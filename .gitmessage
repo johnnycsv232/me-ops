@@ -1,0 +1,16 @@
+# <type>(<scope>): <subject>
+#
+# Types: feat, fix, refactor, docs, test, chore, ci, perf, style, build
+# Scope: ingest, warehouse, entities, workflows, vectors, report, config
+#
+# Subject: imperative mood, no period at end, max 50 chars
+#
+# Body: explain WHAT and WHY, not HOW (wrap at 72 chars)
+#
+# Footer: BREAKING CHANGE:, Closes #issue, Refs #issue
+#
+# Examples:
+#   feat(ingest): add workstream summary parser
+#   fix(warehouse): handle null timestamps in events
+#   refactor(config): move workspace into me_ops/
+#   docs: update README with ingestion instructions

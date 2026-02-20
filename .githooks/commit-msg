@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# ============================================================
+# Conventional Commit Enforcement Hook
+# Skill used: git-advanced-workflows, git-pushing
+# ============================================================
+set -euo pipefail
+
+MSG_FILE="$1"
+MSG=$(head -1 "$MSG_FILE")
+
+# Skip merge commits and fixup commits
+if echo "$MSG" | grep -qE "^(Merge|fixup!|squash!|amend!)"; then
+    exit 0
+fi
+
+# Conventional commit pattern
+# type(scope): subject  OR  type: subject
+PATTERN="^(feat|fix|refactor|docs|test|chore|ci|perf|style|build|revert)(\([a-z0-9_-]+\))?: .{1,72}$"
+
+if ! echo "$MSG" | grep -qE "$PATTERN"; then
+    echo "❌ COMMIT REJECTED: Message does not follow Conventional Commits."
+    echo ""
+    echo "  Format: <type>(<scope>): <subject>"
+    echo ""
+    echo "  Types:  feat fix refactor docs test chore ci perf style build revert"
+    echo "  Scopes: ingest warehouse entities workflows vectors report config"
+    echo ""
+    echo "  Your message: $MSG"
+    echo ""
+    exit 1
+fi
+
+# Check subject length (first line max 72 chars)
+if [ ${#MSG} -gt 72 ]; then
+    echo "⚠️  WARNING: Subject line is ${#MSG} chars (recommended max: 72)"
+fi
+
+exit 0

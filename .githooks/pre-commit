@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# ============================================================
+# Pre-Commit Quality Gate
+# Skill used: git-advanced-workflows, python-pro
+# ============================================================
+set -euo pipefail
+
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
+
+if [ -z "$STAGED_PY" ]; then
+    exit 0
+fi
+
+echo "🔍 Pre-commit checks on staged Python files..."
+
+# 1. Check for debug artifacts
+ISSUES=0
+for f in $STAGED_PY; do
+    if grep -nE "(breakpoint\(\)|import pdb|pdb\.set_trace|print\(.*DEBUG)" "$f" 2>/dev/null; then
+        echo "❌ Debug artifact found in $f"
+        ISSUES=$((ISSUES + 1))
+    fi
+done
+
+# 2. Check for secrets patterns
+for f in $STAGED_PY; do
+    if grep -nEi "(api_key|secret_key|password|token)\s*=\s*['\"][^'\"]+['\"]" "$f" 2>/dev/null; then
+        echo "❌ Possible hardcoded secret in $f"
+        ISSUES=$((ISSUES + 1))
+    fi
+done
+
+# 3. Check for syntax errors
+for f in $STAGED_PY; do
+    if ! python3 -c "import py_compile; py_compile.compile('$f', doraise=True)" 2>/dev/null; then
+        echo "❌ Syntax error in $f"
+        ISSUES=$((ISSUES + 1))
+    fi
+done
+
+if [ $ISSUES -gt 0 ]; then
+    echo ""
+    echo "❌ PRE-COMMIT FAILED: $ISSUES issue(s) found. Fix before committing."
+    exit 1
+fi
+
+echo "✅ All pre-commit checks passed."
+exit 0

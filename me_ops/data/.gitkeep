@@ -1,0 +1,3 @@
+# Keep this directory but ignore its contents (raw data goes here)
+# Pieces LTM JSON exports are placed in the repo root
+# This file exists so git tracks the directory structure

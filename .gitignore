@@ -1,0 +1,47 @@
+# ===========================
+# ME-OPS .gitignore
+# ===========================
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# === DuckDB ===
+*.duckdb
+*.duckdb.wal
+
+# === Qdrant ===
+qdrant_storage/
+
+# === Raw Data (large JSON, tracked via Git LFS or excluded) ===
+pieces_*.json
+*.jsonl
+
+# === IDE / Editor ===
+.vscode/
+*.swp
+*.swo
+*~
+.idea/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Secrets ===
+.env
+.env.*
+!.env.example
+
+# === Misc ===
+*.log
+*.tmp

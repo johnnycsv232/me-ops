@@ -1,0 +1,71 @@
+{
+	"folders": [
+		{
+			"name": "ME-OPS",
+			"path": "./me_ops"
+		},
+		{
+			"name": "Raw Data",
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.defaultInterpreterPath": "${workspaceFolder:ME-OPS}/.venv/bin/python",
+		"python.terminal.activateEnvironment": true,
+		"python.analysis.typeCheckingMode": "basic",
+		"python.analysis.autoImportCompletions": true,
+		"files.exclude": {
+			"**/.git": true,
+			"**/__pycache__": true,
+			"**/.venv": true,
+			"**/me_ops.duckdb.wal": true
+		},
+		"search.exclude": {
+			"**/pieces_*.json": true,
+			"**/.venv": true
+		},
+		"editor.formatOnSave": true,
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter",
+			"editor.tabSize": 4
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"ms-python.vscode-pylance",
+			"ms-python.black-formatter",
+			"evidence-dev.sqltools-duckdb-driver",
+			"mtxr.sqltools"
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "ME-OPS: Ingest",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder:ME-OPS}/ingest.py",
+				"cwd": "${workspaceFolder:Raw Data}",
+				"console": "integratedTerminal"
+			},
+			{
+				"name": "ME-OPS: Daily Report",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder:ME-OPS}/daily_report.py",
+				"cwd": "${workspaceFolder:ME-OPS}",
+				"console": "integratedTerminal"
+			},
+			{
+				"name": "ME-OPS: Queries",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder:ME-OPS}/queries.py",
+				"cwd": "${workspaceFolder:ME-OPS}",
+				"console": "integratedTerminal"
+			}
+		]
+	}
+}

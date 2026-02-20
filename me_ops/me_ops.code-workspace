@@ -2,11 +2,11 @@
 	"folders": [
 		{
 			"name": "ME-OPS",
-			"path": "./me_ops"
+			"path": "."
 		},
 		{
 			"name": "Raw Data",
-			"path": "."
+			"path": ".."
 		}
 	],
 	"settings": {
@@ -14,6 +14,15 @@
 		"python.terminal.activateEnvironment": true,
 		"python.analysis.typeCheckingMode": "basic",
 		"python.analysis.autoImportCompletions": true,
+		"python.analysis.extraPaths": [
+			"${workspaceFolder:ME-OPS}/.venv/lib/python3.12/site-packages"
+		],
+		"python.envFile": "${workspaceFolder:ME-OPS}/.env",
+		"python.venvPath": "${workspaceFolder:ME-OPS}",
+		"python.venvFolders": [
+			".venv"
+		],
+		"pyrefly.searchRoot": "${workspaceFolder:ME-OPS}",
 		"files.exclude": {
 			"**/.git": true,
 			"**/__pycache__": true,
@@ -26,17 +35,27 @@
 		},
 		"editor.formatOnSave": true,
 		"[python]": {
-			"editor.defaultFormatter": "ms-python.black-formatter",
+			"editor.defaultFormatter": "ms-python.python",
 			"editor.tabSize": 4
+		},
+		"[json]": {
+			"editor.defaultFormatter": "vscode.json-language-features"
+		},
+		"[jsonc]": {
+			"editor.defaultFormatter": "vscode.json-language-features"
+		},
+		"[markdown]": {
+			"editor.defaultFormatter": "vscode.markdown-language-features"
 		}
 	},
 	"extensions": {
 		"recommendations": [
 			"ms-python.python",
-			"ms-python.vscode-pylance",
-			"ms-python.black-formatter",
-			"evidence-dev.sqltools-duckdb-driver",
-			"mtxr.sqltools"
+			"ms-python.debugpy",
+			"ms-python.vscode-python-envs",
+			"meta.pyrefly",
+			"esbenp.prettier-vscode",
+			"mechatroner.rainbow-csv"
 		]
 	},
 	"launch": {

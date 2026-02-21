@@ -1,26 +1,29 @@
-"""
-ME-OPS Daily Report
-===================
-Generates a daily briefing combining insights from all modules:
-queries, entities, workflows, mistakes.
-
-Usage:
-    python daily_report.py [--db me_ops.duckdb] [--date 2026-02-19]
-"""
-
 import argparse
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import List, Optional
 
 import duckdb
+
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
 
 
-def generate_report(db_path: Path, report_date: str | None = None) -> bool:
-    """Generate daily briefing report."""
+def generate_report(db_path: Path, report_date: Optional[str] = None) -> bool:
+    """Generates a daily briefing combining insights from all modules.
+
+    Analyzes events, projects, sessions, and patterns for a specific date 
+    to produce a comprehensive markdown report.
+
+    Args:
+        db_path: Path to the DuckDB database.
+        report_date: The date to report on (YYYY-MM-DD). If None, uses the latest activity.
+
+    Returns:
+        True if the report was generated successfully, False otherwise.
+    """
     if not db_path.exists():
         print(f"❌ Database not found: {db_path}")
         return False
@@ -41,23 +44,20 @@ def generate_report(db_path: Path, report_date: str | None = None) -> bool:
     print(f"ME-OPS Daily Report: {target}")
     print("=" * 60)
 
-    lines: list[str] = []
-    lines.append(f"# ME-OPS Daily Report: {target}")
-    lines.append("")
+    lines: List[str] = [f"# ME-OPS Daily Report: {target}", ""]
 
     # --- Section 1: Daily Stats ---
-    lines.append("## 📊 Daily Stats")
-    lines.append("")
+    lines.append("## 📊 Daily Stats\n")
 
-    stats = con.execute(f"""
+    stats = con.execute("""
         SELECT COUNT(*) AS events,
                COUNT(DISTINCT action) AS unique_actions,
                COUNT(DISTINCT app_tool) AS tools_used,
                MIN(ts_start)::TIME AS first_event,
                MAX(ts_start)::TIME AS last_event
         FROM events
-        WHERE ts_start::DATE = '{target}'
-    """).fetchone()
+        WHERE ts_start::DATE = ?
+    """, [target]).fetchone()
 
     if stats and stats[0] > 0:
         lines.append(f"- **Events:** {stats[0]}")
@@ -72,78 +72,65 @@ def generate_report(db_path: Path, report_date: str | None = None) -> bool:
         return True
 
     # --- Section 2: Top Actions ---
-    lines.append("")
-    lines.append("## 🎯 Top Actions")
-    lines.append("")
-    rows = con.execute(f"""
+    lines.extend(["", "## 🎯 Top Actions", ""])
+    rows = con.execute("""
         SELECT action, COUNT(*) AS n FROM events
-        WHERE ts_start::DATE = '{target}'
+        WHERE ts_start::DATE = ?
         GROUP BY action ORDER BY n DESC LIMIT 8
-    """).fetchall()
+    """, [target]).fetchall()
     for r in rows:
         lines.append(f"- `{r[0]}`: {r[1]}")
 
     # --- Section 3: Projects Touched ---
-    lines.append("")
-    lines.append("## 🏗️ Projects Touched")
-    lines.append("")
-    rows = con.execute(f"""
+    lines.extend(["", "## 🏗️ Projects Touched", ""])
+    rows = con.execute("""
         SELECT p.name, COUNT(ep.event_id) AS events
         FROM event_projects ep
         JOIN projects p ON ep.project_id = p.project_id
         JOIN events e ON ep.event_id = e.event_id
-        WHERE e.ts_start::DATE = '{target}'
+        WHERE e.ts_start::DATE = ?
         GROUP BY p.name ORDER BY events DESC
-    """).fetchall()
+    """, [target]).fetchall()
     if rows:
         for r in rows:
             lines.append(f"- **{r[0]}**: {r[1]} events")
     else:
         lines.append("- No project references detected.")
 
-    # --- Section 4: Sessions (if table exists) ---
+    # --- Section 4: Sessions ---
     has_sessions = con.execute(
-        "SELECT COUNT(*) FROM information_schema.tables "
-        "WHERE table_name = 'sessions'"
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'sessions'"
     ).fetchone()[0]
 
     if has_sessions:
-        lines.append("")
-        lines.append("## ⏱️ Sessions")
-        lines.append("")
-        rows = con.execute(f"""
+        lines.extend(["", "## ⏱️ Sessions", ""])
+        rows = con.execute("""
             SELECT session_id, ts_start::TIME, ts_end::TIME,
                    duration_min, event_count, dominant_action, projects
             FROM sessions
-            WHERE ts_start::DATE = '{target}'
+            WHERE ts_start::DATE = ?
             ORDER BY ts_start
-        """).fetchall()
+        """, [target]).fetchall()
         if rows:
             for r in rows:
                 proj = f" [{r[6]}]" if r[6] else ""
                 lines.append(
-                    f"- **Session {r[0]}**: {r[1]}→{r[2]} "
-                    f"({r[3]}min, {r[4]} events, "
-                    f"dominant: `{r[5]}`){proj}"
+                    f"- **Session {r[0]}**: {r[1]}→{r[2]} ({r[3]}min, {r[4]} events, dominant: `{r[5]}`){proj}"
                 )
         else:
             lines.append("- No sessions on this date.")
 
     # --- Section 5: Warnings ---
     has_patterns = con.execute(
-        "SELECT COUNT(*) FROM information_schema.tables "
-        "WHERE table_name = 'failure_patterns'"
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'failure_patterns'"
     ).fetchone()[0]
 
     if has_patterns:
-        lines.append("")
-        lines.append("## ⚠️ Active Warnings")
-        lines.append("")
+        lines.extend(["", "## ⚠️ Active Warnings", ""])
         rows = con.execute("""
             SELECT severity, pattern_type, description
             FROM failure_patterns
-            ORDER BY CASE severity
-                WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END
+            ORDER BY CASE severity WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END
         """).fetchall()
         if rows:
             for r in rows:
@@ -154,29 +141,22 @@ def generate_report(db_path: Path, report_date: str | None = None) -> bool:
 
     # --- Section 6: Anti-Playbook ---
     has_playbook = con.execute(
-        "SELECT COUNT(*) FROM information_schema.tables "
-        "WHERE table_name = 'anti_playbook'"
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'anti_playbook'"
     ).fetchone()[0]
 
     if has_playbook:
-        lines.append("")
-        lines.append("## ⛔ Anti-Playbook Reminders")
-        lines.append("")
+        lines.extend(["", "## ⛔ Anti-Playbook Reminders", ""])
         rows = con.execute("""
             SELECT rule_text, confidence FROM anti_playbook
             ORDER BY confidence DESC
         """).fetchall()
         if rows:
             for r in rows:
-                lines.append(f"- {r[0]} *(conf: {r[1]:.0%})*")
+                lines.append(f"- {r[0]} *(conf: {float(r[1]):.0%})*")
 
     # --- Section 7: 7-day trend ---
-    lines.append("")
-    lines.append("## 📈 7-Day Trend")
-    lines.append("")
-    lines.append("| Date | Events | Actions | Projects |")
-    lines.append("|------|--------|---------|----------|")
-    rows = con.execute(f"""
+    lines.extend(["", "## 📈 7-Day Trend", "", "| Date | Events | Actions | Projects |", "|------|--------|---------|----------|"])
+    rows = con.execute("""
         SELECT e.ts_start::DATE AS day,
                COUNT(*) AS events,
                COUNT(DISTINCT e.action) AS actions,
@@ -184,16 +164,14 @@ def generate_report(db_path: Path, report_date: str | None = None) -> bool:
         FROM events e
         LEFT JOIN event_projects ep ON e.event_id = ep.event_id
         WHERE e.ts_start IS NOT NULL
-        AND e.ts_start::DATE > DATE '{target}' - INTERVAL '7 days'
-        AND e.ts_start::DATE <= DATE '{target}'
+        AND e.ts_start::DATE > CAST(? AS DATE) - INTERVAL '7 days'
+        AND e.ts_start::DATE <= CAST(? AS DATE)
         GROUP BY day ORDER BY day DESC
-    """).fetchall()
+    """, [target, target]).fetchall()
     for r in rows:
         lines.append(f"| {r[0]} | {r[1]} | {r[2]} | {r[3]} |")
 
-    lines.append("")
-    lines.append("---")
-    lines.append(f"*Generated: {datetime.now(timezone.utc).isoformat()}*")
+    lines.extend(["", "---", f"*Generated: {datetime.now(timezone.utc).isoformat()}*"])
 
     report = "\n".join(lines)
 
@@ -214,7 +192,6 @@ def generate_report(db_path: Path, report_date: str | None = None) -> bool:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ME-OPS Daily Report")
     parser.add_argument("--db", type=Path, default=DB_PATH)
-    parser.add_argument("--date", type=str, default=None,
-                        help="Report date (YYYY-MM-DD). Default: latest.")
+    parser.add_argument("--date", type=str, default=None, help="Report date (YYYY-MM-DD). Default: latest.")
     args = parser.parse_args()
     sys.exit(0 if generate_report(args.db, args.date) else 1)

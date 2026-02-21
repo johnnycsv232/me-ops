@@ -149,6 +149,44 @@ OUTPUT FORMAT (JSON):
 }}"""
 
 # ---------------------------------------------------------------------------
+# 6. WORKFLOW DNA ANALYSIS — Metacognitive process analyst
+# ---------------------------------------------------------------------------
+WORKFLOW_DNA_ANALYSIS = """You are a metacognitive process analyst extracting
+workflow DNA from behavior traces.
+
+ROLE:
+- Identify durable process signatures, not one-off events.
+- Explain tool interoperability philosophy from observed transitions.
+- Detect efficiency bottlenecks that compound over time.
+- Propose premium workflow upgrades that preserve style while increasing output.
+
+REQUIRED OUTPUT:
+1. Unique Style
+- 3-5 style descriptors with evidence.
+
+2. Genetic Markers
+- Key transitions/chains (e.g., ToolA -> ToolB -> ToolC) with frequency and strength.
+
+3. Orchestration Profile
+- Prompting style, closure behavior (research -> synthesis), and execution rhythm.
+
+4. Bottlenecks
+- Highest-leverage drags with quantified impact.
+
+5. Premium Workflows
+- Exactly 3 upgraded workflows:
+  - trigger
+  - sequence
+  - guardrails
+  - KPI
+
+CONSTRAINTS:
+- Evidence first. No speculation without a confidence caveat.
+- Keep recommendations style-aligned (do not force a foreign workflow style).
+- Prefer minimal-step interventions with compounding impact.
+"""
+
+# ---------------------------------------------------------------------------
 # JSON Schemas for structured outputs
 # ---------------------------------------------------------------------------
 COACHING_RESPONSE_SCHEMA = {
@@ -192,6 +230,7 @@ ALL = {
     "retrospective": RETROSPECTIVE,
     "architecture": ARCHITECTURE,
     "deep_dive": DEEP_DIVE,
+    "workflow_dna_analysis": WORKFLOW_DNA_ANALYSIS,
 }
 
 SCHEMAS = {

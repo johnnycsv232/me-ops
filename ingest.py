@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
+from taxonomy import categorize_event
+
 
 
 # ---------------------------------------------------------------------------
@@ -197,6 +199,13 @@ CREATE TABLE IF NOT EXISTS event_tags (
     tag_id      VARCHAR,
     tag_text    VARCHAR,
     PRIMARY KEY (event_id, tag_id)
+);
+
+-- Subcategorization table
+CREATE TABLE IF NOT EXISTS event_subcategories (
+    event_id    VARCHAR PRIMARY KEY REFERENCES events(event_id),
+    theme       VARCHAR NOT NULL,
+    subcategory VARCHAR NOT NULL
 );
 """
 
@@ -578,15 +587,23 @@ def ingest_files_from_anchors(con: duckdb.DuckDBPyConnection, records: list[dict
             )
 
 
-def ingest_tags_links(con: duckdb.DuckDBPyConnection, records: list[dict]):
-    """Link tags to workstream events via event_tags (chunked bulk insert)."""
-    batch: list[tuple] = []
+def ingest_tags_links(con: duckdb.DuckDBPyConnection, records: list[dict[str, Any]]) -> None:
+    """Link tags to workstream events via event_tags (chunked bulk insert).
+
+    Args:
+        con: Active DuckDB connection.
+        records: List of tag records from pieces_tags.json.
+    """
+    batch: list[tuple[str, str, str]] = []
     for rec in records:
         tag_id = rec.get("id")
         tag_text = rec.get("text", "")
+        if not tag_id or not isinstance(tag_id, str):
+            continue
+            
         ws_events = rec.get("workstream_events", {}).get("indices", {})
         for ws_event_id in ws_events:
-            batch.append((ws_event_id, tag_id, tag_text))
+            batch.append((ws_event_id, tag_id, str(tag_text)))
 
     if not batch:
         return
@@ -594,7 +611,7 @@ def ingest_tags_links(con: duckdb.DuckDBPyConnection, records: list[dict]):
     CHUNK = 5000
     con.execute("BEGIN TRANSACTION")
     for i in range(0, len(batch), CHUNK):
-        chunk = batch[i:i + CHUNK]
+        chunk = batch[i : i + CHUNK]
         placeholders = ",".join(["(?,?,?)"] * len(chunk))
         flat = [v for row in chunk for v in row]
         con.execute(f"INSERT OR IGNORE INTO event_tags VALUES {placeholders}", flat)
@@ -646,6 +663,47 @@ def mine_projects(con: duckdb.DuckDBPyConnection):
         ) sub
         WHERE projects.project_id = sub.project_id
     """)
+
+
+def mine_subcategories(con: duckdb.DuckDBPyConnection) -> None:
+    """Assign theme/subcategory to all events based on taxonomy.
+
+    Extracts all events from the DB, runs them through the categorization 
+    logic in taxonomy.py, and persists the results in event_subcategories.
+
+    Args:
+        con: Active DuckDB connection.
+    """
+    print("  Categorizing events...")
+    events = con.execute("SELECT event_id, target, metadata_json FROM events").fetchall()
+
+    batch: list[tuple[str, str, str]] = []
+    for eid, target, meta_json in events:
+        meta_text = ""
+        if meta_json:
+            try:
+                # Handle both string and dict types for metadata_json
+                if isinstance(meta_json, str):
+                    meta_text = meta_json
+                else:
+                    meta_text = json.dumps(meta_json)
+            except Exception:
+                meta_text = str(meta_json)
+
+        theme, subcat = categorize_event(target, meta_text)
+        batch.append((eid, theme, subcat))
+
+    if batch:
+        CHUNK = 5000
+        con.execute("BEGIN TRANSACTION")
+        for i in range(0, len(batch), CHUNK):
+            chunk = batch[i : i + CHUNK]
+            placeholders = ",".join(["(?,?,?)"] * len(chunk))
+            flat = [v for row in chunk for v in row]
+            con.execute(f"INSERT OR IGNORE INTO event_subcategories VALUES {placeholders}", flat)
+        con.execute("COMMIT")
+
+    print(f"    Categorized {len(batch)} events")
 
 
 # ---------------------------------------------------------------------------
@@ -767,12 +825,15 @@ def run(data_dir: Path, db_path: Path):
     tool_links = con.execute("SELECT COUNT(*) FROM event_tools").fetchone()[0]
     print(f"  Event-tool links: {tool_links}")
 
+    # Mine subcategories
+    mine_subcategories(con)
+
     # Final stats
     print(f"\n{'='*60}")
     print("FINAL TABLE COUNTS:")
     for table in ["raw_sources", "events", "people", "tools", "models",
                    "projects", "files", "event_tools", "event_files",
-                   "event_projects", "event_tags"]:
+                   "event_projects", "event_tags", "event_subcategories"]:
         count = con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
         print(f"  {table:<20} {count:>8}")
 

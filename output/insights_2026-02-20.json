@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-02-21T04:52:30.033875+00:00",
+  "memory_mode": "persistent",
+  "coverage": {
+    "events_count": 14367,
+    "active_days": 58,
+    "signal_count": 0
+  },
+  "summary": {
+    "insight_count": 0,
+    "new_count": 0,
+    "recurring_count": 0,
+    "high_impact_count": 0
+  },
+  "insights": [],
+  "action_queue": []
+}

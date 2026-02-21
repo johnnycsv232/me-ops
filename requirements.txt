@@ -2,3 +2,6 @@ duckdb>=1.2.0
 networkx>=3.4
 sentence-transformers>=3.4
 qdrant-client>=1.13
+python-dotenv
+google-genai
+pytest>=9.0.0

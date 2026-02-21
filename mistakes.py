@@ -16,6 +16,7 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
+from typing import Optional
 
 import duckdb
 
@@ -54,38 +55,64 @@ def detect_context_thrashing(con: duckdb.DuckDBPyConnection) -> int:
     """Detect rapid project switches within sessions (thrashing)."""
     con.execute("DELETE FROM context_switches")
 
-    # Get events with project associations, ordered by time
-    rows = con.execute("""
-        SELECT e.event_id, e.ts_start, p.name AS project,
-               s.session_id
-        FROM events e
-        JOIN event_projects ep ON e.event_id = ep.event_id
-        JOIN projects p ON ep.project_id = p.project_id
-        LEFT JOIN sessions s ON e.ts_start BETWEEN s.ts_start AND s.ts_end
-        WHERE e.ts_start IS NOT NULL
-        ORDER BY e.ts_start
-    """).fetchall()
-
-    switches = []
-    switch_id = 0
-    for i in range(1, len(rows)):
-        prev_proj = rows[i - 1][2]
-        curr_proj = rows[i][2]
-        if prev_proj != curr_proj:
-            gap = (rows[i][1] - rows[i - 1][1]).total_seconds()
-            if gap < 300:  # switch within 5 minutes = thrashing
-                switches.append((
-                    switch_id, rows[i][1], prev_proj, curr_proj,
-                    round(gap, 1), rows[i][3]
-                ))
-                switch_id += 1
-
-    if switches:
-        con.executemany(
-            "INSERT INTO context_switches VALUES (?,?,?,?,?,?)",
-            switches[:1000],  # cap at 1000
+    switches_cte = """
+        WITH ordered AS (
+            SELECT
+                e.ts_start AS ts,
+                p.name AS project,
+                s.session_id,
+                LAG(e.ts_start) OVER (
+                    ORDER BY e.ts_start, e.event_id, p.name
+                ) AS prev_ts,
+                LAG(p.name) OVER (
+                    ORDER BY e.ts_start, e.event_id, p.name
+                ) AS prev_project
+            FROM events e
+            JOIN event_projects ep ON e.event_id = ep.event_id
+            JOIN projects p ON ep.project_id = p.project_id
+            LEFT JOIN sessions s ON e.ts_start BETWEEN s.ts_start AND s.ts_end
+            WHERE e.ts_start IS NOT NULL
+        ),
+        switches AS (
+            SELECT
+                ts,
+                prev_project AS from_project,
+                project AS to_project,
+                EXTRACT(EPOCH FROM ts - prev_ts) AS gap_seconds,
+                session_id
+            FROM ordered
+            WHERE prev_project IS NOT NULL
+              AND prev_project <> project
+              AND EXTRACT(EPOCH FROM ts - prev_ts) < 300
         )
-    return len(switches)
+    """
+
+    total_switches = con.execute(
+        f"""
+        {switches_cte}
+        SELECT COUNT(*) FROM switches
+        """
+    ).fetchone()[0]
+
+    if total_switches:
+        con.execute(
+            f"""
+            INSERT INTO context_switches
+            {switches_cte}
+            SELECT
+                ROW_NUMBER() OVER (ORDER BY ts) - 1 AS switch_id,
+                ts,
+                from_project,
+                to_project,
+                ROUND(gap_seconds, 1),
+                session_id
+            FROM switches
+            ORDER BY ts
+            LIMIT 1000
+            """
+        )
+
+    return int(total_switches)
 
 
 def detect_failure_patterns(con: duckdb.DuckDBPyConnection) -> int:
@@ -272,72 +299,83 @@ def build_anti_playbook(con: duckdb.DuckDBPyConnection) -> int:
     return len(rules)
 
 
-def run(db_path: Path) -> bool:
+def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     """Execute failure detection pipeline."""
-    if not db_path.exists():
+    if con is None and not db_path.exists():
         print(f"❌ Database not found: {db_path}")
         return False
 
-    con = duckdb.connect(str(db_path))
+    owns_connection = con is None
+    if con is None:
+        con = duckdb.connect(str(db_path))
     print("ME-OPS Failure Pattern Detection")
     print("=" * 60)
 
-    # Create schema
-    for stmt in MISTAKES_DDL.split(";"):
-        stmt = stmt.strip()
-        if stmt:
-            con.execute(stmt)
+    try:
+        # Create schema
+        for stmt in MISTAKES_DDL.split(";"):
+            stmt = stmt.strip()
+            if stmt:
+                con.execute(stmt)
 
-    # Requires sessions table from workflows.py
-    has_sessions = con.execute(
-        "SELECT COUNT(*) FROM information_schema.tables "
-        "WHERE table_name = 'sessions'"
-    ).fetchone()[0]
-    if not has_sessions:
-        print("  ⚠️ No sessions table. Run workflows.py first.")
-        print("  Skipping context-switch detection.")
+        # Requires sessions table from workflows.py
+        has_sessions = con.execute(
+            "SELECT COUNT(*) FROM information_schema.tables "
+            "WHERE table_name = 'sessions'"
+        ).fetchone()[0]
+        if not has_sessions:
+            print("  ⚠️ No sessions table. Run workflows.py first.")
+            print("  Skipping context-switch detection.")
 
-    # 1. Context thrashing
-    if has_sessions:
-        print("  Detecting context switches...")
-        switches = detect_context_thrashing(con)
-        print(f"    → {switches} rapid switches detected")
+        con.execute("BEGIN TRANSACTION")
+        try:
+            # 1. Context thrashing
+            if has_sessions:
+                print("  Detecting context switches...")
+                switches = detect_context_thrashing(con)
+                print(f"    → {switches} rapid switches detected")
 
-    # 2. Failure patterns
-    print("  Analyzing failure patterns...")
-    patterns = detect_failure_patterns(con)
-    print(f"    → {patterns} patterns found")
+            # 2. Failure patterns
+            print("  Analyzing failure patterns...")
+            patterns = detect_failure_patterns(con)
+            print(f"    → {patterns} patterns found")
 
-    # 3. Anti-playbook
-    print("  Building anti-playbook...")
-    rules = build_anti_playbook(con)
-    print(f"    → {rules} rules generated")
+            # 3. Anti-playbook
+            print("  Building anti-playbook...")
+            rules = build_anti_playbook(con)
+            print(f"    → {rules} rules generated")
+            con.execute("COMMIT")
+        except Exception:
+            con.execute("ROLLBACK")
+            raise
 
-    # Print results
-    print(f"\n{'='*60}")
-    print("  FAILURE PATTERNS:")
-    rows = con.execute("""
-        SELECT severity, pattern_type, description
-        FROM failure_patterns ORDER BY
-            CASE severity WHEN 'high' THEN 1
-                          WHEN 'medium' THEN 2 ELSE 3 END
-    """).fetchall()
-    for r in rows:
-        icon = "🔴" if r[0] == "high" else "🟡" if r[0] == "medium" else "🟢"
-        print(f"    {icon} [{r[1]}] {r[2]}")
+        # Print results
+        print(f"\n{'='*60}")
+        print("  FAILURE PATTERNS:")
+        rows = con.execute("""
+            SELECT severity, pattern_type, description
+            FROM failure_patterns ORDER BY
+                CASE severity WHEN 'high' THEN 1
+                              WHEN 'medium' THEN 2 ELSE 3 END
+        """).fetchall()
+        for r in rows:
+            icon = "🔴" if r[0] == "high" else "🟡" if r[0] == "medium" else "🟢"
+            print(f"    {icon} [{r[1]}] {r[2]}")
 
-    print(f"\n  ANTI-PLAYBOOK RULES:")
-    rows = con.execute("""
-        SELECT rule_text, confidence FROM anti_playbook
-        ORDER BY confidence DESC
-    """).fetchall()
-    for r in rows:
-        print(f"    ⛔ {r[0]} (confidence: {r[1]:.0%})")
+        print(f"\n  ANTI-PLAYBOOK RULES:")
+        rows = con.execute("""
+            SELECT rule_text, confidence FROM anti_playbook
+            ORDER BY confidence DESC
+        """).fetchall()
+        for r in rows:
+            print(f"    ⛔ {r[0]} (confidence: {r[1]:.0%})")
 
-    con.close()
-    print(f"\n{'='*60}")
-    print("✅ Failure analysis complete")
-    return True
+        print(f"\n{'='*60}")
+        print("✅ Failure analysis complete")
+        return True
+    finally:
+        if owns_connection:
+            con.close()
 
 
 if __name__ == "__main__":

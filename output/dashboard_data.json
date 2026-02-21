@@ -1,0 +1,326 @@
+{
+  "metadata": {
+    "generated_at": "2026-02-20T21:51:14.628141",
+    "user": "Johnny Cage",
+    "system": "ME-OPS v1.0"
+  },
+  "scores": [
+    {
+      "date": "2026-02-19 00:00:00",
+      "total_events": 1068,
+      "unique_actions": 9,
+      "focus_score": 6.099999904632568,
+      "output_score": 2.5,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.6
+    },
+    {
+      "date": "2026-02-18 00:00:00",
+      "total_events": 138,
+      "unique_actions": 7,
+      "focus_score": 6.599999904632568,
+      "output_score": 0.30000001192092896,
+      "health_score": 10.0,
+      "consistency_score": 5.0,
+      "composite_score": 5.1
+    },
+    {
+      "date": "2026-02-13 00:00:00",
+      "total_events": 525,
+      "unique_actions": 9,
+      "focus_score": 5.900000095367432,
+      "output_score": 1.2000000476837158,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.1
+    },
+    {
+      "date": "2026-02-12 00:00:00",
+      "total_events": 414,
+      "unique_actions": 7,
+      "focus_score": 7.0,
+      "output_score": 1.0,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.4
+    },
+    {
+      "date": "2026-02-11 00:00:00",
+      "total_events": 616,
+      "unique_actions": 9,
+      "focus_score": 5.5,
+      "output_score": 1.5,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.1
+    },
+    {
+      "date": "2026-02-10 00:00:00",
+      "total_events": 602,
+      "unique_actions": 8,
+      "focus_score": 5.199999809265137,
+      "output_score": 1.399999976158142,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.0
+    },
+    {
+      "date": "2026-02-09 00:00:00",
+      "total_events": 214,
+      "unique_actions": 7,
+      "focus_score": 6.0,
+      "output_score": 0.5,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 4.9
+    },
+    {
+      "date": "2026-02-08 00:00:00",
+      "total_events": 285,
+      "unique_actions": 7,
+      "focus_score": 6.699999809265137,
+      "output_score": 0.699999988079071,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.2
+    },
+    {
+      "date": "2026-02-07 00:00:00",
+      "total_events": 110,
+      "unique_actions": 8,
+      "focus_score": 8.399999618530273,
+      "output_score": 0.30000001192092896,
+      "health_score": 10.0,
+      "consistency_score": 10.0,
+      "composite_score": 6.6
+    },
+    {
+      "date": "2026-02-06 00:00:00",
+      "total_events": 260,
+      "unique_actions": 9,
+      "focus_score": 7.5,
+      "output_score": 0.6000000238418579,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.4
+    },
+    {
+      "date": "2026-02-05 00:00:00",
+      "total_events": 303,
+      "unique_actions": 9,
+      "focus_score": 7.599999904632568,
+      "output_score": 0.699999988079071,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.5
+    },
+    {
+      "date": "2026-02-04 00:00:00",
+      "total_events": 509,
+      "unique_actions": 7,
+      "focus_score": 6.400000095367432,
+      "output_score": 1.2000000476837158,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 5.3
+    },
+    {
+      "date": "2026-02-03 00:00:00",
+      "total_events": 1833,
+      "unique_actions": 10,
+      "focus_score": 9.300000190734863,
+      "output_score": 4.300000190734863,
+      "health_score": 5.0,
+      "consistency_score": 10.0,
+      "composite_score": 7.1
+    },
+    {
+      "date": "2026-02-02 00:00:00",
+      "total_events": 28,
+      "unique_actions": 6,
+      "focus_score": 9.600000381469727,
+      "output_score": 0.10000000149011612,
+      "health_score": 10.0,
+      "consistency_score": 10.0,
+      "composite_score": 6.9
+    }
+  ],
+  "workflows": [
+    {
+      "workflow_id": 1,
+      "name": "Research Loop",
+      "description": "Browse web \u2192 search/query \u2192 assess time range \u2192 summarize workstream. Your default research-to-insight pipeline.",
+      "action_sequence": "web_visit \u2192 hint_suggested_query \u2192 time_range \u2192 workstream_summary",
+      "trigger_hour": 19,
+      "avg_duration_min": NaN,
+      "avg_events": NaN,
+      "frequency": 508,
+      "effectiveness": 0.6,
+      "category": "research",
+      "recommendation": "Add a 15-min timer to prevent rabbit holes. Exit after 2 rounds max. If no answer, escalate to AI agent.",
+      "created_at": "2026-02-20 21:35:11.030394"
+    },
+    {
+      "workflow_id": 2,
+      "name": "Annotation Pipeline",
+      "description": "Summarize workstream \u2192 create annotation summary \u2192 write description. Your documentation and note-taking workflow.",
+      "action_sequence": "workstream_summary \u2192 annotation_summary \u2192 annotation_description",
+      "trigger_hour": null,
+      "avg_duration_min": NaN,
+      "avg_events": NaN,
+      "frequency": 1173,
+      "effectiveness": 0.8,
+      "category": "documentation",
+      "recommendation": "This is your strongest chain (0s gaps = instant flow). Use it immediately after completing any task to capture learnings.",
+      "created_at": "2026-02-20 21:35:11.052725"
+    },
+    {
+      "workflow_id": 3,
+      "name": "Deep Browse",
+      "description": "Extended web browsing sessions (3+ consecutive visits). Can be productive research or a distraction trap.",
+      "action_sequence": "web_visit \u2192 web_visit \u2192 web_visit (repeat)",
+      "trigger_hour": 19,
+      "avg_duration_min": NaN,
+      "avg_events": NaN,
+      "frequency": 10004,
+      "effectiveness": 0.3,
+      "category": "research",
+      "recommendation": "DANGER: This is your #1 time sink (44.4% of all events). Set a hard 15-min timer. After 3 visits, MUST switch to Annotation Pipeline to capture what you learned.",
+      "created_at": "2026-02-20 21:35:11.060193"
+    },
+    {
+      "workflow_id": 4,
+      "name": "GettUpp Focus Sprint",
+      "description": "Single-project deep work sessions on GettUpp. No cross-project switching. Your highest-output mode.",
+      "action_sequence": "single-project focus \u2192 mixed actions \u2192 sustained output",
+      "trigger_hour": 11,
+      "avg_duration_min": 215.0,
+      "avg_events": 229.0,
+      "frequency": 38,
+      "effectiveness": 0.9,
+      "category": "execution",
+      "recommendation": "Your best workflow. Protect it: no Slack, no email, no browser tabs outside project scope. Schedule 2h blocks.",
+      "created_at": "2026-02-20 21:35:11.066641"
+    },
+    {
+      "workflow_id": 5,
+      "name": "Multi-Project Juggle",
+      "description": "Sessions spanning 2+ projects with context switches. Longer sessions but lower intensity per project.",
+      "action_sequence": "ProjectA work \u2192 context_switch \u2192 ProjectB work \u2192 switch back",
+      "trigger_hour": null,
+      "avg_duration_min": 236.0,
+      "avg_events": 240.0,
+      "frequency": 48,
+      "effectiveness": 0.5,
+      "category": "execution",
+      "recommendation": "AVOID when possible. Each switch costs ~23 min re-focus. If unavoidable, use 'batch mode': finish one project's task list COMPLETELY before switching.",
+      "created_at": "2026-02-20 21:35:11.074287"
+    },
+    {
+      "workflow_id": 6,
+      "name": "Late Night Push",
+      "description": "Work sessions starting 10PM-5AM CST. High productivity score at 3AM (!) but costs 5.5h recovery gap next day.",
+      "action_sequence": "late start \u2192 sustained work \u2192 eventual crash",
+      "trigger_hour": 22,
+      "avg_duration_min": 116.0,
+      "avg_events": 162.0,
+      "frequency": 62,
+      "effectiveness": 0.4,
+      "category": "health",
+      "recommendation": "Your 3AM productivity (score 18.83) is real but unsustainable. The 5.5h recovery gap means net output is NEGATIVE vs sleeping and starting fresh at 6AM. Reserve for deadlines only.",
+      "created_at": "2026-02-20 21:35:11.082165"
+    },
+    {
+      "workflow_id": 7,
+      "name": "Query-Driven Investigation",
+      "description": "Search/query \u2192 assess time range \u2192 iterate. Your analytical problem-solving workflow.",
+      "action_sequence": "hint_suggested_query \u2192 time_range \u2192 hint_suggested_query (loop)",
+      "trigger_hour": null,
+      "avg_duration_min": NaN,
+      "avg_events": NaN,
+      "frequency": 637,
+      "effectiveness": 0.7,
+      "category": "analysis",
+      "recommendation": "Good analytical pattern. Improve by adding a 'conclusion step' \u2014 after 3 query rounds, force yourself to write a 1-sentence finding.",
+      "created_at": "2026-02-20 21:35:11.093390"
+    },
+    {
+      "workflow_id": 8,
+      "name": "IronClad Sprint",
+      "description": "Focused IronClad-only sessions. Shorter bursts but concentrated output.",
+      "action_sequence": "IronClad focus \u2192 planning/code \u2192 output",
+      "trigger_hour": null,
+      "avg_duration_min": 64.0,
+      "avg_events": 53.0,
+      "frequency": 4,
+      "effectiveness": 0.7,
+      "category": "execution",
+      "recommendation": "NEEDS MORE of these. IronClad is your priority product but only has 5 focused sessions. Schedule daily 90-min blocks.",
+      "created_at": "2026-02-20 21:35:11.100786"
+    },
+    {
+      "workflow_id": 9,
+      "name": "Tool Exploration / Config",
+      "description": "IDE configuration, tool setup, debugging environment issues. Necessary but often becomes a trap.",
+      "action_sequence": "config debugging \u2192 troubleshooting \u2192 more config",
+      "trigger_hour": null,
+      "avg_duration_min": 154.0,
+      "avg_events": NaN,
+      "frequency": 9,
+      "effectiveness": 0.2,
+      "category": "overhead",
+      "recommendation": "Cap at 30 min. If not solved, Docker/reset/move on. Your LTM shows 15+ config troubleshooting workstreams. Write a runbook and STOP reinventing the wheel.",
+      "created_at": "2026-02-20 21:35:11.109035"
+    },
+    {
+      "workflow_id": 10,
+      "name": "Conversation Sprint",
+      "description": "Conversation-driven sessions (AI chat, pair programming). High action diversity, variable output.",
+      "action_sequence": "conversation_activity \u2192 activity \u2192 hint_suggested_query \u2192 repeat",
+      "trigger_hour": null,
+      "avg_duration_min": NaN,
+      "avg_events": NaN,
+      "frequency": 177,
+      "effectiveness": 0.65,
+      "category": "collaboration",
+      "recommendation": "Good for unblocking. Limit to 45-min bursts. Always end with Annotation Pipeline to capture insights.",
+      "created_at": "2026-02-20 21:35:11.117983"
+    }
+  ],
+  "insights": {
+    "Productivity": [
+      {
+        "title": "The Energy/Output Paradox",
+        "prompt": "Analyze the correlation between my 40 high-health-risk days and my actual output. Am I working more but shipping less? Look at the specific task types I default to after 11 PM.",
+        "value": "Identifies if late-night work is actually just 'busy work' configuration traps."
+      },
+      {
+        "title": "The Switching Tax Audit",
+        "prompt": "I have 35 days where context switching was high. Identify the 'Project Catalyst' \u2014 which project change usually triggers the decline in intensity for the rest of the day?",
+        "value": "Finds the specific project switch that breaks your flow state."
+      }
+    ],
+    "IronClad": [
+      {
+        "title": "The Analysis-to-Action Gap",
+        "prompt": "I have 460 events for IronClad, but most are queries/annotations. Draft a plan to convert my next 50 IronClad events into production code. What is the smallest code-commit I am avoiding?",
+        "value": "Forces movement from 'safe' research to 'scary' execution."
+      }
+    ],
+    "Cristina/KB-DS": [
+      {
+        "title": "Protocol Blindspots",
+        "prompt": "Review the 'Master Truth Extraction Protocol' events. Identify one pattern of engagement I am consistently misidentifying or ignoring despite it being in the KB-DS schema.",
+        "value": "Uncovers cognitive biases in relational analysis."
+      }
+    ],
+    "AI Arbitrage": [
+      {
+        "title": "Pilot Pathing",
+        "prompt": "Based on my GettUpp ENT activity, simulate the simplest path to a $345/mo pilot. What one specific feature is the 'minimum viable revenue' component I haven't coded yet?",
+        "value": "Simplifies complex mapping into a single revenue-generating action."
+      }
+    ]
+  }
+}

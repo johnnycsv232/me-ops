@@ -1,0 +1,29 @@
+{
+  "project_name": "me_ops",
+  "version": "1.0.0",
+  "structure": {
+    "directories": [
+      "data",
+      "output",
+      "scripts",
+      "tests",
+      "sources",
+      ".githooks"
+    ],
+    "critical_files": [
+      "me_ops.duckdb",
+      "architect.py",
+      "agent.py",
+      "deep_analysis.py",
+      "prompts.py",
+      ".env"
+    ]
+  },
+  "git_config": {
+    "pull.rebase": true,
+    "fetch.prune": true,
+    "rerere.enabled": true,
+    "core.hooksPath": ".githooks"
+  },
+  "hardened": true
+}

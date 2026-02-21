@@ -1,8 +1,8 @@
 """
 ME-OPS Workflow Mining
 ======================
-Uses networkx to mine session sequences, find common workflows,
-and identify behavioral patterns from event chains.
+Mines session sequences, finds common workflows,
+and identifies behavioral patterns from event chains.
 
 Creates tables:
   - sessions: detected work sessions with boundaries
@@ -14,13 +14,12 @@ Usage:
 """
 
 import argparse
-import json
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import Optional
 
 import duckdb
-import networkx as nx
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 
@@ -91,10 +90,12 @@ def detect_sessions(
     return sessions
 
 
-def build_transition_graph(sessions: list[dict]) -> nx.DiGraph:
-    """Build action-to-action transition graph from sessions."""
-    g = nx.DiGraph()
-    edge_gaps: dict[tuple, list[float]] = {}
+def build_transition_graph(
+    sessions: list[dict],
+) -> tuple[set[str], list[tuple[str, str, int, float]]]:
+    """Build action transition edges from sessions."""
+    nodes: set[str] = set()
+    edge_stats: dict[tuple[str, str], tuple[int, float]] = {}
 
     for sess in sessions:
         events = sess["events"]
@@ -102,23 +103,29 @@ def build_transition_graph(sessions: list[dict]) -> nx.DiGraph:
             a = events[i - 1][2]  # action
             b = events[i][2]
             gap = (events[i][1] - events[i - 1][1]).total_seconds()
+            nodes.add(a)
+            nodes.add(b)
+            weight, gap_sum = edge_stats.get((a, b), (0, 0.0))
+            edge_stats[(a, b)] = (weight + 1, gap_sum + gap)
 
-            if g.has_edge(a, b):
-                g[a][b]["weight"] += 1
-            else:
-                g.add_edge(a, b, weight=1)
+    edges = [
+        (a, b, weight, round(gap_sum / max(weight, 1), 1))
+        for (a, b), (weight, gap_sum) in edge_stats.items()
+    ]
+    return nodes, edges
 
-            key = (a, b)
-            if key not in edge_gaps:
-                edge_gaps[key] = []
-            edge_gaps[key].append(gap)
 
-    # Store avg gap
-    for (a, b), gaps in edge_gaps.items():
-        if g.has_edge(a, b):
-            g[a][b]["avg_gap"] = sum(gaps) / len(gaps)
+def compute_action_centrality(
+    edge_rows: list[tuple[str, str, int, float]],
+) -> dict[str, float]:
+    """Compute a lightweight weighted centrality score from edge weights."""
+    scores: dict[str, float] = {}
+    for from_action, to_action, weight, _ in edge_rows:
+        scores[from_action] = scores.get(from_action, 0.0) + float(weight)
+        scores[to_action] = scores.get(to_action, 0.0) + float(weight)
 
-    return g
+    total = sum(scores.values()) or 1.0
+    return {action: value / total for action, value in scores.items()}
 
 
 def mine_patterns(sessions: list[dict], window: int = 3) -> list[tuple]:
@@ -141,120 +148,159 @@ def mine_patterns(sessions: list[dict], window: int = 3) -> list[tuple]:
     ]
 
 
-def run(db_path: Path, gap_minutes: int = 30) -> bool:
+def _event_projects_map(con: duckdb.DuckDBPyConnection) -> dict[str, set[str]]:
+    """Build event_id -> project-name mapping in one query."""
+    mapping: dict[str, set[str]] = {}
+    rows = con.execute("""
+        SELECT ep.event_id, p.name
+        FROM event_projects ep
+        JOIN projects p ON ep.project_id = p.project_id
+    """).fetchall()
+    for event_id, project_name in rows:
+        mapping.setdefault(event_id, set()).add(project_name)
+    return mapping
+
+
+def run(
+    db_path: Path,
+    gap_minutes: int = 30,
+    con: Optional[duckdb.DuckDBPyConnection] = None,
+) -> bool:
     """Execute workflow mining pipeline."""
-    if not db_path.exists():
+    if con is None and not db_path.exists():
         print(f"❌ Database not found: {db_path}")
         return False
 
-    con = duckdb.connect(str(db_path))
+    owns_connection = con is None
+    if con is None:
+        con = duckdb.connect(str(db_path))
     print("ME-OPS Workflow Mining")
     print("=" * 60)
 
-    # Create schema
-    for stmt in WORKFLOW_DDL.split(";"):
-        stmt = stmt.strip()
-        if stmt:
-            con.execute(stmt)
+    try:
+        # Create schema
+        for stmt in WORKFLOW_DDL.split(";"):
+            stmt = stmt.strip()
+            if stmt:
+                con.execute(stmt)
 
-    # 1. Detect sessions
-    print(f"  Detecting sessions (gap threshold: {gap_minutes}min)...")
-    sessions = detect_sessions(con, gap_minutes)
-    print(f"    → {len(sessions)} sessions detected")
+        # 1. Detect sessions
+        print(f"  Detecting sessions (gap threshold: {gap_minutes}min)...")
+        sessions = detect_sessions(con, gap_minutes)
+        print(f"    → {len(sessions)} sessions detected")
 
-    # Store sessions
-    con.execute("DELETE FROM sessions")
-    for sid, sess in enumerate(sessions):
-        events = sess["events"]
-        actions = sess["actions"]
-        ts_start = events[0][1]
-        ts_end = events[-1][1]
-        duration = (ts_end - ts_start).total_seconds() / 60.0
-        dominant = Counter(actions).most_common(1)[0][0] if actions else None
+        event_projects = _event_projects_map(con)
 
-        # Find projects in session
-        event_ids = [e[0] for e in events]
-        if event_ids:
-            placeholders = ",".join(["?"] * min(len(event_ids), 100))
-            proj_rows = con.execute(
-                f"SELECT DISTINCT p.name FROM event_projects ep "
-                f"JOIN projects p ON ep.project_id = p.project_id "
-                f"WHERE ep.event_id IN ({placeholders})",
-                event_ids[:100],
-            ).fetchall()
-            projects = ", ".join(r[0] for r in proj_rows) if proj_rows else None
-        else:
-            projects = None
+        # Store sessions
+        con.execute("DELETE FROM sessions")
+        session_rows: list[list[object]] = []
+        for sid, sess in enumerate(sessions):
+            events = sess["events"]
+            actions = sess["actions"]
+            ts_start = events[0][1]
+            ts_end = events[-1][1]
+            duration = (ts_end - ts_start).total_seconds() / 60.0
+            dominant = Counter(actions).most_common(1)[0][0] if actions else None
 
-        con.execute(
-            "INSERT OR REPLACE INTO sessions VALUES (?,?,?,?,?,?,?,?)",
-            [sid, ts_start, ts_end, round(duration, 1),
-             len(events), len(set(actions)), dominant, projects],
-        )
+            session_projects: set[str] = set()
+            for event_id, _, _ in events:
+                session_projects.update(event_projects.get(event_id, set()))
+            projects = ", ".join(sorted(session_projects)) if session_projects else None
 
-    # 2. Build transition graph
-    print("  Building action transition graph...")
-    graph = build_transition_graph(sessions)
-    con.execute("DELETE FROM workflow_edges")
-    for a, b, data in graph.edges(data=True):
-        con.execute(
-            "INSERT OR REPLACE INTO workflow_edges VALUES (?,?,?,?)",
-            [a, b, data["weight"], round(data.get("avg_gap", 0), 1)],
-        )
-    print(f"    → {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges")
+            session_rows.append(
+                [
+                    sid,
+                    ts_start,
+                    ts_end,
+                    round(duration, 1),
+                    len(events),
+                    len(set(actions)),
+                    dominant,
+                    projects,
+                ]
+            )
 
-    # 3. Mine patterns
-    print("  Mining action patterns (3-grams)...")
-    patterns = mine_patterns(sessions)
-    con.execute("DELETE FROM workflow_patterns")
-    for pid, (seq, freq, example_sid) in enumerate(patterns):
-        con.execute(
-            "INSERT OR REPLACE INTO workflow_patterns VALUES (?,?,?,?,?)",
-            [pid, seq, freq, None, example_sid],
-        )
-    print(f"    → {len(patterns)} recurring patterns found")
+        con.execute("BEGIN TRANSACTION")
+        try:
+            if session_rows:
+                con.executemany(
+                    "INSERT INTO sessions VALUES (?,?,?,?,?,?,?,?)",
+                    session_rows,
+                )
 
-    # Print insights
-    print(f"\n{'='*60}")
-    print("  SESSION STATS:")
-    rows = con.execute("""
-        SELECT COUNT(*) AS sessions,
-               ROUND(AVG(duration_min), 1) AS avg_min,
-               ROUND(AVG(event_count), 0) AS avg_events,
-               MAX(duration_min) AS longest_min
-        FROM sessions
-    """).fetchone()
-    print(f"    Sessions: {rows[0]}, Avg: {rows[1]}min, "
-          f"Avg events: {rows[2]}, Longest: {rows[3]}min")
+            # 2. Build transition graph
+            print("  Building action transition graph...")
+            nodes, edge_rows = build_transition_graph(sessions)
+            con.execute("DELETE FROM workflow_edges")
+            if edge_rows:
+                con.executemany(
+                    "INSERT INTO workflow_edges VALUES (?,?,?,?)",
+                    [[a, b, weight, avg_gap] for a, b, weight, avg_gap in edge_rows],
+                )
+            print(f"    → {len(nodes)} nodes, {len(edge_rows)} edges")
 
-    print(f"\n  TOP 10 WORKFLOW PATTERNS:")
-    rows = con.execute("""
-        SELECT sequence, frequency FROM workflow_patterns
-        ORDER BY frequency DESC LIMIT 10
-    """).fetchall()
-    for r in rows:
-        print(f"    [{r[1]:>4}x] {r[0]}")
+            # 3. Mine patterns
+            print("  Mining action patterns (3-grams)...")
+            patterns = mine_patterns(sessions)
+            con.execute("DELETE FROM workflow_patterns")
+            pattern_rows = [
+                [pid, seq, freq, None, example_sid]
+                for pid, (seq, freq, example_sid) in enumerate(patterns)
+            ]
+            if pattern_rows:
+                con.executemany(
+                    "INSERT INTO workflow_patterns VALUES (?,?,?,?,?)",
+                    pattern_rows,
+                )
+            print(f"    → {len(patterns)} recurring patterns found")
+            con.execute("COMMIT")
+        except Exception:
+            con.execute("ROLLBACK")
+            raise
 
-    print(f"\n  STRONGEST TRANSITIONS:")
-    rows = con.execute("""
-        SELECT from_action, to_action, weight, avg_gap_sec
-        FROM workflow_edges ORDER BY weight DESC LIMIT 10
-    """).fetchall()
-    for r in rows:
-        print(f"    {r[0]} → {r[1]}  ({r[2]}x, avg gap: {r[3]:.0f}s)")
+        # Print insights
+        print(f"\n{'='*60}")
+        print("  SESSION STATS:")
+        rows = con.execute("""
+            SELECT COUNT(*) AS sessions,
+                   ROUND(AVG(duration_min), 1) AS avg_min,
+                   ROUND(AVG(event_count), 0) AS avg_events,
+                   MAX(duration_min) AS longest_min
+            FROM sessions
+        """).fetchone()
+        print(f"    Sessions: {rows[0]}, Avg: {rows[1]}min, "
+              f"Avg events: {rows[2]}, Longest: {rows[3]}min")
 
-    # Graph metrics
-    if graph.number_of_nodes() > 0:
-        print(f"\n  GRAPH CENTRALITY (most pivotal actions):")
-        centrality = nx.pagerank(graph)
-        top = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:8]
-        for action, score in top:
-            print(f"    {action:<40} PageRank: {score:.4f}")
+        print(f"\n  TOP 10 WORKFLOW PATTERNS:")
+        rows = con.execute("""
+            SELECT sequence, frequency FROM workflow_patterns
+            ORDER BY frequency DESC LIMIT 10
+        """).fetchall()
+        for r in rows:
+            print(f"    [{r[1]:>4}x] {r[0]}")
 
-    con.close()
-    print(f"\n{'='*60}")
-    print("✅ Workflow mining complete")
-    return True
+        print(f"\n  STRONGEST TRANSITIONS:")
+        rows = con.execute("""
+            SELECT from_action, to_action, weight, avg_gap_sec
+            FROM workflow_edges ORDER BY weight DESC LIMIT 10
+        """).fetchall()
+        for r in rows:
+            print(f"    {r[0]} → {r[1]}  ({r[2]}x, avg gap: {r[3]:.0f}s)")
+
+        # Action centrality
+        if nodes:
+            print(f"\n  GRAPH CENTRALITY (most pivotal actions):")
+            centrality = compute_action_centrality(edge_rows)
+            top = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:8]
+            for action, score in top:
+                print(f"    {action:<40} Score: {score:.4f}")
+
+        print(f"\n{'='*60}")
+        print("✅ Workflow mining complete")
+        return True
+    finally:
+        if owns_connection:
+            con.close()
 
 
 if __name__ == "__main__":

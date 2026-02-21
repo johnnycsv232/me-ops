@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 import duckdb
+from insights import get_insight_prompts
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -297,10 +298,19 @@ def get_workflows() -> str:
 # Agent runner
 # ---------------------------------------------------------------------------
 
+def get_insight_prompts_tool() -> str:
+    """Retrieve discovery-based prompts to unlock hidden behavioral insights.
+    
+    Use this tool when the user asks for inspiration, 'crazy useful' insights,
+    or how to unlock deeper understanding of their data.
+    """
+    return json.dumps(get_insight_prompts(), indent=2, default=str)
+
+
 # All tools the agent can use
 TOOLS = [
     query_database, list_tables, get_session_summary, get_failure_patterns,
-    get_coaching_rules, get_daily_scores, get_workflows,
+    get_coaching_rules, get_daily_scores, get_workflows, get_insight_prompts_tool,
 ]
 
 

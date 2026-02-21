@@ -1,0 +1,157 @@
+{
+  "coverage": {
+    "event_count": 14367,
+    "active_days": 58,
+    "window_start": "2025-12-02",
+    "window_end": "2026-02-19"
+  },
+  "genetic_markers": [
+    {
+      "name": "Evidence Compression",
+      "transition": "framing -> synthesis",
+      "frequency": 1211,
+      "support_days": 50,
+      "avg_gap_sec": 54.0,
+      "triad_support": 1211,
+      "strength": 0.911
+    },
+    {
+      "name": "Constraint Framing",
+      "transition": "query -> framing",
+      "frequency": 640,
+      "support_days": 29,
+      "avg_gap_sec": 23.1,
+      "triad_support": 639,
+      "strength": 0.683
+    },
+    {
+      "name": "Query to Activity Relay",
+      "transition": "query -> activity",
+      "frequency": 253,
+      "support_days": 12,
+      "avg_gap_sec": 5.0,
+      "triad_support": 253,
+      "strength": 0.5
+    },
+    {
+      "name": "Synthesis to Query Relay",
+      "transition": "synthesis -> query",
+      "frequency": 529,
+      "support_days": 28,
+      "avg_gap_sec": 1621.1,
+      "triad_support": 529,
+      "strength": 0.493
+    },
+    {
+      "name": "Synthesis to Framing Relay",
+      "transition": "synthesis -> framing",
+      "frequency": 481,
+      "support_days": 29,
+      "avg_gap_sec": 3256.8,
+      "triad_support": 481,
+      "strength": 0.474
+    },
+    {
+      "name": "Synthesis to Conversation Relay",
+      "transition": "synthesis -> conversation",
+      "frequency": 129,
+      "support_days": 24,
+      "avg_gap_sec": 173.3,
+      "triad_support": 129,
+      "strength": 0.435
+    },
+    {
+      "name": "Conversation to Framing Relay",
+      "transition": "conversation -> framing",
+      "frequency": 86,
+      "support_days": 22,
+      "avg_gap_sec": 190.5,
+      "triad_support": 86,
+      "strength": 0.413
+    },
+    {
+      "name": "Activity to Query Relay",
+      "transition": "activity -> query",
+      "frequency": 308,
+      "support_days": 33,
+      "avg_gap_sec": 2980.7,
+      "triad_support": 308,
+      "strength": 0.402
+    }
+  ],
+  "style_profile": {
+    "unique_style": [
+      "Query-Ladder Refinement",
+      "Evidence-Seeking Prompting",
+      "Zero-Drift Orchestration",
+      "Capture-First Consolidation"
+    ],
+    "metrics": {
+      "sessions": 175,
+      "notion_first_ratio": 0.0,
+      "closure_ratio": 0.553,
+      "query_ladder_ratio": 0.937,
+      "synthesis_share": 0.182,
+      "web_share": 0.0
+    },
+    "prompt_fingerprint": {
+      "query_count": 3684.0,
+      "avg_words": 7.44,
+      "question_ratio": 0.906,
+      "evidence_seeking_ratio": 0.795,
+      "systems_language_ratio": 0.154,
+      "imperative_ratio": 0.002
+    },
+    "orchestration_signature": "framing -> synthesis; closure=55%; query_ladder=94%"
+  },
+  "bottlenecks": [
+    {
+      "name": "Query Loop Fatigue",
+      "severity": "medium",
+      "impact_score": 4766.55,
+      "evidence": "668 loops >=4 steps, 6139 total query/framing events",
+      "recommendation": "After two query rounds, require a one-sentence decision or next action."
+    }
+  ],
+  "premium_workflows": [
+    {
+      "name": "Premium Workflow 01: Intent Command Sprint",
+      "trigger": "Start of deep-work block",
+      "base_marker": "framing -> synthesis",
+      "steps": [
+        "Open command center and define one measurable outcome.",
+        "Run two focused research hops max before forcing a query decision.",
+        "Compress findings into workstream summary plus annotation notes.",
+        "Hand off to code/file action within five minutes.",
+        "Close with a one-line execution checkpoint."
+      ],
+      "kpi": "Research-to-synthesis closure rate >= 70%"
+    },
+    {
+      "name": "Premium Workflow 02: Query Ladder to Artifact Forge",
+      "trigger": "Any high-ambiguity problem",
+      "base_marker": "query -> framing -> synthesis",
+      "steps": [
+        "Issue one evidence-seeking query (not open-ended browsing).",
+        "Pin a time range or scope boundary immediately.",
+        "Write one decisive synthesis statement.",
+        "Transform synthesis into artifact: code, schema, or deliverable note.",
+        "Capture counterfactual: what would invalidate this decision?"
+      ],
+      "kpi": "Decision latency from query to synthesis <= 90 seconds median"
+    },
+    {
+      "name": "Premium Workflow 03: Anti-Drift Recovery Loop",
+      "trigger": "When Query Loop Fatigue signal appears",
+      "base_marker": "web -> web (drift interrupt)",
+      "steps": [
+        "Detect drift trigger (3+ consecutive web actions or looping queries).",
+        "Pause exploration and run a 60-second framing checkpoint.",
+        "Force a workstream summary before resuming exploration.",
+        "Either commit to build mode or intentionally exit the loop.",
+        "Log the interruption source to improve future guardrails."
+      ],
+      "kpi": "Browser drift episodes reduced by 40% over 14 days"
+    }
+  ]
+}

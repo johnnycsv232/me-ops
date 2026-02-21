@@ -5,16 +5,65 @@
 # ============================================================
 set -euo pipefail
 
+# -------------------------------------------------------
+# GUARD 0: Nested Git Detection
+# Prevents the repo from living inside another git repo.
+# -------------------------------------------------------
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+PARENT_DIR="$(dirname "$REPO_ROOT")"
+
+# Walk up from parent looking for a .git directory
+CHECK_DIR="$PARENT_DIR"
+while [ "$CHECK_DIR" != "/" ]; do
+    if [ -d "$CHECK_DIR/.git" ]; then
+        echo ""
+        echo "🚨 NESTED GIT REPO DETECTED"
+        echo "   This repo:   $REPO_ROOT"
+        echo "   Parent repo: $CHECK_DIR/.git"
+        echo ""
+        echo "   A parent directory contains a .git directory."
+        echo "   This WILL cause confusion about which repo owns your files."
+        echo ""
+        echo "   FIX: Remove the parent .git:"
+        echo "     rm -rf $CHECK_DIR/.git"
+        echo ""
+        echo "❌ COMMIT BLOCKED — resolve nested git first."
+        exit 1
+    fi
+    CHECK_DIR="$(dirname "$CHECK_DIR")"
+done
+
+# -------------------------------------------------------
+# GUARD 1: No child .git directories (submodule-less repos)
+# -------------------------------------------------------
+CHILD_GITS="$(find "$REPO_ROOT" -mindepth 2 -maxdepth 4 -name ".git" -type d 2>/dev/null || true)"
+if [ -n "$CHILD_GITS" ]; then
+    echo ""
+    echo "🚨 CHILD GIT REPO(S) DETECTED inside this project:"
+    echo "$CHILD_GITS" | while read -r g; do echo "   → $g"; done
+    echo ""
+    echo "   If intentional, register as a submodule."
+    echo "   Otherwise remove: rm -rf <path>/.git"
+    echo ""
+    echo "❌ COMMIT BLOCKED — resolve child git repo(s) first."
+    exit 1
+fi
+
+# -------------------------------------------------------
+# GUARD 2: Python staged-file checks
+# -------------------------------------------------------
 STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
 
 if [ -z "$STAGED_PY" ]; then
+    echo "✅ Pre-commit passed (no Python files staged)."
     exit 0
 fi
 
 echo "🔍 Pre-commit checks on staged Python files..."
 
-# 1. Check for debug artifacts
 ISSUES=0
+
+# Check for debug artifacts
 for f in $STAGED_PY; do
     if grep -nE "(breakpoint\(\)|import pdb|pdb\.set_trace|print\(.*DEBUG)" "$f" 2>/dev/null; then
         echo "❌ Debug artifact found in $f"
@@ -22,7 +71,7 @@ for f in $STAGED_PY; do
     fi
 done
 
-# 2. Check for secrets patterns
+# Check for secrets patterns
 for f in $STAGED_PY; do
     if grep -nEi "(api_key|secret_key|password|token)\s*=\s*['\"][^'\"]+['\"]" "$f" 2>/dev/null; then
         echo "❌ Possible hardcoded secret in $f"
@@ -30,7 +79,7 @@ for f in $STAGED_PY; do
     fi
 done
 
-# 3. Check for syntax errors
+# Check for syntax errors
 for f in $STAGED_PY; do
     if ! python3 -c "import py_compile; py_compile.compile('$f', doraise=True)" 2>/dev/null; then
         echo "❌ Syntax error in $f"

@@ -11,6 +11,7 @@ Skill used: verification-before-completion, git-advanced-workflows, python-pro, 
 ## 1. Environment Detection
 
 // turbo
+
 ```bash
 echo "=== ENVIRONMENT ===" \
 && echo "OS: $(cat /etc/os-release 2>/dev/null | grep PRETTY_NAME | cut -d= -f2 | tr -d '"')" \
@@ -22,9 +23,39 @@ echo "=== ENVIRONMENT ===" \
 && echo "PWD: $(pwd)"
 ```
 
-## 2. Git Repository Health
+## 2. Nested Git Detection (CRITICAL)
 
 // turbo
+
+```bash
+echo "=== NESTED GIT CHECK ===" \
+&& REPO_ROOT="$(git rev-parse --show-toplevel)" \
+&& echo "Repo root: $REPO_ROOT" \
+&& echo "--- Parent .git ---" \
+&& PARENT="$(dirname "$REPO_ROOT")" \
+&& FOUND="" \
+&& CHECK="$PARENT" \
+&& while [ "$CHECK" != "/" ]; do \
+     if [ -d "$CHECK/.git" ]; then FOUND="$CHECK"; break; fi; \
+     CHECK="$(dirname "$CHECK")"; \
+   done \
+&& if [ -n "$FOUND" ]; then \
+     echo "🚨 FAIL: Parent git repo at $FOUND/.git"; \
+     echo "   FIX: rm -rf $FOUND/.git"; \
+   else echo "✅ No parent .git"; fi \
+&& echo "--- Child .git ---" \
+&& CHILDREN="$(find "$REPO_ROOT" -mindepth 2 -maxdepth 4 -name .git -type d 2>/dev/null)" \
+&& if [ -n "$CHILDREN" ]; then \
+     echo "🚨 FAIL: Child .git found:"; echo "$CHILDREN"; \
+   else echo "✅ No child .git"; fi
+```
+
+**If ANY nested .git is found, fix it BEFORE proceeding. Do not skip.**
+
+## 3. Git Repository Health
+
+// turbo
+
 ```bash
 echo "=== GIT HEALTH ===" \
 && echo "--- Status ---" && git status --short --branch \
@@ -38,6 +69,7 @@ echo "=== GIT HEALTH ===" \
 ```
 
 **Check for:**
+
 - Uncommitted changes (stage/commit or stash before proceeding)
 - Remote configured and reachable
 - No corrupted objects (fsck clean)
@@ -52,11 +84,13 @@ git status --short --branch
 ```
 
 **If behind remote:**
+
 ```bash
 git pull --rebase
 ```
 
 **If diverged:**
+
 ```bash
 # Investigate before merging
 git log --oneline HEAD..origin/main
@@ -66,6 +100,7 @@ git log --oneline origin/main..HEAD
 ## 4. Python Environment Health
 
 // turbo
+
 ```bash
 echo "=== PYTHON HEALTH ===" \
 && echo "--- Interpreter ---" && .venv/bin/python --version \
@@ -93,6 +128,7 @@ print('All critical imports OK')
 ```
 
 **If deps are missing:**
+
 ```bash
 .venv/bin/pip install -r requirements.txt
 ```
@@ -100,6 +136,7 @@ print('All critical imports OK')
 ## 5. IDE / Workspace Health
 
 // turbo
+
 ```bash
 echo "=== WORKSPACE HEALTH ===" \
 && echo "--- Workspace File ---" && find . -name "*.code-workspace" -not -path "./.venv/*" -exec echo "Found: {}" \; \
@@ -109,6 +146,7 @@ echo "=== WORKSPACE HEALTH ===" \
 ```
 
 **Check for:**
+
 - Workspace file exists inside project directory (not parent)
 - `pyrightconfig.json` exists with correct venv path
 - No duplicate workspace files
@@ -118,6 +156,7 @@ echo "=== WORKSPACE HEALTH ===" \
 ## 6. Data & Output Health
 
 // turbo
+
 ```bash
 echo "=== DATA HEALTH ===" \
 && echo "--- Data Dir ---" && ls -lhS data/ 2>/dev/null | head -10 || echo "No data/ dir" \
@@ -129,12 +168,14 @@ echo "=== DATA HEALTH ===" \
 ## 7. Running Processes Check
 
 // turbo
+
 ```bash
 echo "=== RUNNING PROCESSES ===" \
 && ps aux | grep -E "(python|node|npm)" | grep -v grep | head -10 || echo "No relevant processes"
 ```
 
 **Check for:**
+
 - Orphaned processes from previous sessions
 - Port conflicts
 - Background jobs that should be restarted
@@ -142,6 +183,7 @@ echo "=== RUNNING PROCESSES ===" \
 ## 8. GitHub Remote Health
 
 // turbo
+
 ```bash
 echo "=== GITHUB HEALTH ===" \
 && (gh auth status 2>&1 || echo "gh CLI not authenticated") \
@@ -151,6 +193,7 @@ echo "=== GITHUB HEALTH ===" \
 ## 9. Security Scan
 
 // turbo
+
 ```bash
 echo "=== SECURITY SCAN ===" \
 && echo "--- Secrets in tracked files ---" && git grep -nEi "(api_key|secret_key|password|token)\s*=\s*['\"][^'\"]{8,}['\"]" -- '*.py' '*.json' '*.yaml' '*.yml' '*.env' 2>/dev/null | head -5 || echo "✅ No hardcoded secrets found" \

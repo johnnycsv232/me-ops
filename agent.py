@@ -223,8 +223,10 @@ TOOLS = [query_database, list_tables, get_session_summary, get_failure_patterns]
 def run_agent(user_query: str, *, verbose: bool = False) -> str:
     """Run a single agent query and return the response.
 
-    Uses google-genai automatic function calling per official docs:
-    https://ai.google.dev/gemini-api/docs/function-calling
+    Uses manual function calling loop (model emits FunctionCall parts,
+    we dispatch locally, send FunctionResponse back).
+
+    Ref: https://ai.google.dev/gemini-api/docs/function-calling
 
     Args:
         user_query: Natural language question about your behavioral data.
@@ -233,6 +235,9 @@ def run_agent(user_query: str, *, verbose: bool = False) -> str:
     Returns:
         The agent's final text response.
     """
+    import time as _time
+    from google.genai.errors import ClientError
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("ERROR: Set GEMINI_API_KEY in .env or environment.", file=sys.stderr)
@@ -240,27 +245,97 @@ def run_agent(user_query: str, *, verbose: bool = False) -> str:
 
     client = genai.Client(api_key=api_key)
 
-    # Configure automatic function calling per official docs
-    # Ref: google-genai SDK types.GenerateContentConfig
+    # Tool dispatch table
+    tool_fns = {fn.__name__: fn for fn in TOOLS}
+
+    # Declare tools via schema (no auto-calling)
     config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT,
         tools=TOOLS,
-        temperature=0.1,  # Low temp for analytical accuracy
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(
+            disable=True,
+        ),
+        temperature=0.1,
     )
 
     if verbose:
         print(f"  Agent query: {user_query}")
         print(f"  Model: {MODEL_ID}")
-        print(f"  Tools: {[t.__name__ for t in TOOLS]}")
+        print(f"  Tools: {list(tool_fns.keys())}")
         print()
 
-    response = client.models.generate_content(
-        model=MODEL_ID,
-        contents=user_query,
-        config=config,
-    )
+    # Build conversation history
+    contents: list = [types.Content(role="user", parts=[types.Part.from_text(text=user_query)])]
 
-    return response.text or "(No response generated)"
+    max_rounds = 10
+    for round_num in range(max_rounds):
+        # Call model with retry on rate limit
+        response = None
+        for attempt in range(1, 4):
+            try:
+                response = client.models.generate_content(
+                    model=MODEL_ID,
+                    contents=contents,
+                    config=config,
+                )
+                break
+            except ClientError as e:
+                if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                    wait = 15 * attempt
+                    if verbose:
+                        print(f"  ⏳ Rate limited (attempt {attempt}/3), retrying in {wait}s...")
+                    _time.sleep(wait)
+                else:
+                    return f"❌ API error: {e}"
+
+        if response is None:
+            return "❌ Rate limit exceeded after retries. Try again shortly."
+
+        # Check if model wants to call functions
+        candidate = response.candidates[0] if response.candidates else None
+        if not candidate or not candidate.content or not candidate.content.parts:
+            return "(No response generated)"
+
+        parts = candidate.content.parts
+        fn_calls = [p for p in parts if p.function_call]
+
+        # If no function calls, return the text response
+        if not fn_calls:
+            text_parts = [p.text for p in parts if p.text]
+            return "\n".join(text_parts) if text_parts else "(No response generated)"
+
+        # Append model's response (with function calls) to history
+        contents.append(candidate.content)
+
+        # Execute each function call and build response parts
+        fn_response_parts: list = []
+        for fc_part in fn_calls:
+            fc = fc_part.function_call
+            fn_name = fc.name
+            fn_args = dict(fc.args) if fc.args else {}
+
+            if verbose:
+                print(f"  🔧 Tool call [{round_num+1}]: {fn_name}({json.dumps(fn_args, default=str)[:200]})")
+
+            if fn_name in tool_fns:
+                try:
+                    result = tool_fns[fn_name](**fn_args)
+                except Exception as e:
+                    result = json.dumps({"error": str(e)})
+            else:
+                result = json.dumps({"error": f"Unknown tool: {fn_name}"})
+
+            fn_response_parts.append(
+                types.Part.from_function_response(
+                    name=fn_name,
+                    response={"result": result},
+                )
+            )
+
+        # Append function responses to history
+        contents.append(types.Content(role="user", parts=fn_response_parts))
+
+    return "❌ Agent exceeded max rounds (possible loop). Try a simpler question."
 
 
 def interactive_mode() -> None:

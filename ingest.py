@@ -579,8 +579,8 @@ def ingest_files_from_anchors(con: duckdb.DuckDBPyConnection, records: list[dict
 
 
 def ingest_tags_links(con: duckdb.DuckDBPyConnection, records: list[dict]):
-    """Link tags to workstream events via event_tags."""
-    batch = []
+    """Link tags to workstream events via event_tags (chunked bulk insert)."""
+    batch: list[tuple] = []
     for rec in records:
         tag_id = rec.get("id")
         tag_text = rec.get("text", "")
@@ -588,11 +588,17 @@ def ingest_tags_links(con: duckdb.DuckDBPyConnection, records: list[dict]):
         for ws_event_id in ws_events:
             batch.append((ws_event_id, tag_id, tag_text))
 
-    if batch:
-        con.executemany(
-            "INSERT OR IGNORE INTO event_tags VALUES (?, ?, ?)",
-            batch,
-        )
+    if not batch:
+        return
+
+    CHUNK = 5000
+    con.execute("BEGIN TRANSACTION")
+    for i in range(0, len(batch), CHUNK):
+        chunk = batch[i:i + CHUNK]
+        placeholders = ",".join(["(?,?,?)"] * len(chunk))
+        flat = [v for row in chunk for v in row]
+        con.execute(f"INSERT OR IGNORE INTO event_tags VALUES {placeholders}", flat)
+    con.execute("COMMIT")
 
 
 # ---------------------------------------------------------------------------
@@ -724,9 +730,11 @@ def run(data_dir: Path, db_path: Path):
             event_rows = event_fn(records, fname)
             event_count = len(event_rows)
             if event_rows:
-                con.executemany(
-                    "INSERT OR IGNORE INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    event_rows,
+                placeholders = "(" + ",".join(["?"] * 12) + ")"
+                flat = [v for row in event_rows for v in row]
+                con.execute(
+                    "INSERT OR IGNORE INTO events VALUES " + ",".join([placeholders] * len(event_rows)),
+                    flat,
                 )
 
         # Run reference ingestor

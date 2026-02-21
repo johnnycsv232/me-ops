@@ -42,34 +42,44 @@ MODEL_ID = "gemini-2.5-flash"  # fast + tool-calling capable
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """\
-You are ME-OPS Agent — a personal analytics assistant for a software developer.
-You have access to a DuckDB database containing the user's behavioral data:
-events, sessions, projects, tools, files, tags, workflow patterns, and more.
+You are ME-OPS Agent — a personal analytics assistant AND behavioral coach
+for a software developer named Johnny Cage. You have access to a DuckDB
+database containing 28K+ behavioral events, modularized workflows, coaching
+rules, and daily performance scores.
 
 ## Your capabilities
 - Query any table in the database using SQL
-- Analyze temporal patterns (late nights, session durations, context switches)
-- Identify projects, tools, and files the user works with
-- Detect failure patterns and anti-playbook violations
-- Explore the knowledge graph of relationships between entities
+- Retrieve modularized workflows (use get_workflows tool)
+- Check coaching rules and compliance (use get_coaching_rules tool)
+- Get daily performance scores (use get_daily_scores tool)
+- Analyze temporal patterns, failure modes, and improvement trends
+
+## Modular Workflows (reference by name)
+1. Research Loop — 60% effective
+2. Annotation Pipeline — 80% effective
+3. Deep Browse — 30% effective (DANGER)
+4. GettUpp Focus Sprint — 90% effective (BEST)
+5. Multi-Project Juggle — 50% effective
+6. Late Night Push — 40% effective
+7. Query-Driven Investigation — 70% effective
+8. IronClad Sprint — 70% effective
+9. Tool Exploration / Config — 20% effective (DANGER)
+10. Conversation Sprint — 65% effective
 
 ## Rules
-1. ALWAYS use the query_database tool to answer questions about the user's data.
+1. ALWAYS use tools to answer data questions. Never fabricate data.
 2. Write DuckDB-compatible SQL. Key tables:
-   - events (event_id, ts_start, ts_end, action, target, duration_ms, outcome_label)
-   - sessions (session_id, ts_start, ts_end, duration_min, event_count, projects)
-   - projects (project_id, name)
-   - tools (tool_id, name, category)
-   - files (file_id, fullpath, extension, repo_root)
-   - workflow_edges (from_action, to_action, weight)
-   - failure_patterns (pattern_type, description, severity)
-   - anti_playbook (rule_text, trigger, evidence)
-   - graph_edges (src_type, src_id, rel, dst_type, dst_id, weight)
-   - context_switches (ts, from_project, to_project, gap_seconds)
-3. Present results in clear, concise markdown.
-4. If a query returns no results, explain why and suggest alternatives.
-5. For temporal queries, timestamps are in UTC. Adjust for the user's timezone (CST/CDT = UTC-6).
-6. Do NOT fabricate data. Only report what the database returns.
+   - events, sessions, projects, tools, files
+   - discovered_workflows (10 named modular patterns)
+   - coaching_rules (10 evidence-backed rules)
+   - daily_scores (4-axis: focus, output, health, consistency)
+   - improvement_log (per-day rule compliance tracking)
+   - workflow_edges, failure_patterns, anti_playbook, graph_edges
+   - context_switches, entity_summary, session_clusters
+3. When discussing performance, reference coaching rules by number.
+4. When discussing work patterns, use modular workflow names.
+5. Timestamps are UTC. User timezone = CST (UTC-6).
+6. Present results in clear, concise markdown.
 """
 
 
@@ -212,12 +222,86 @@ def get_failure_patterns() -> str:
         con.close()
 
 
+def get_coaching_rules() -> str:
+    """Retrieve all coaching rules with severity, confidence, and evidence.
+
+    Use this tool when the user asks about their performance rules,
+    what they should or shouldn't do, or how to improve.
+
+    Returns:
+        JSON array of coaching rules.
+    """
+    con = _get_connection()
+    try:
+        result = con.execute("""
+            SELECT rule_id, category, rule_text, evidence_count, severity, confidence
+            FROM coaching_rules ORDER BY confidence DESC
+        """).fetchdf()
+        return result.to_json(orient="records", indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+    finally:
+        con.close()
+
+
+def get_daily_scores(date: str = "") -> str:
+    """Get daily performance scores (focus, output, health, consistency, composite).
+
+    Args:
+        date: Optional YYYY-MM-DD. If empty, returns last 14 days.
+
+    Returns:
+        JSON with daily scores across 4 axes plus composite.
+    """
+    con = _get_connection()
+    try:
+        if date:
+            result = con.execute("""
+                SELECT * FROM daily_scores WHERE date = CAST(? AS DATE)
+            """, [date]).fetchdf()
+        else:
+            result = con.execute("""
+                SELECT * FROM daily_scores ORDER BY date DESC LIMIT 14
+            """).fetchdf()
+        return result.to_json(orient="records", date_format="iso", indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+    finally:
+        con.close()
+
+
+def get_workflows() -> str:
+    """Retrieve all discovered modular workflows with effectiveness scores.
+
+    Use this when the user asks about their work patterns or process.
+
+    Returns:
+        JSON array of modular workflows with names, sequences,
+        effectiveness, frequency, and recommendations.
+    """
+    con = _get_connection()
+    try:
+        result = con.execute("""
+            SELECT workflow_id, name, description, action_sequence,
+                   frequency, effectiveness, category, recommendation
+            FROM discovered_workflows ORDER BY effectiveness DESC
+        """).fetchdf()
+        return result.to_json(orient="records", indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+    finally:
+        con.close()
+
+
 # ---------------------------------------------------------------------------
 # Agent runner
 # ---------------------------------------------------------------------------
 
 # All tools the agent can use
-TOOLS = [query_database, list_tables, get_session_summary, get_failure_patterns]
+TOOLS = [
+    query_database, list_tables, get_session_summary, get_failure_patterns,
+    get_coaching_rules, get_daily_scores, get_workflows,
+]
 
 
 def run_agent(user_query: str, *, verbose: bool = False) -> str:

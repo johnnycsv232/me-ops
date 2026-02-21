@@ -6,7 +6,6 @@ __pycache__/
 
 # IDE
 .vscode/
-*.code-workspace
 
 # DuckDB
 *.duckdb
@@ -22,3 +21,6 @@ pieces_*.json
 # Antigravity / agent internals
 .antigravity/
 .env
+
+# Prevent nested repo artifact from returning
+me_ops/

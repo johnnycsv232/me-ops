@@ -5,35 +5,45 @@ A self-updating personal analytics system that learns your patterns, removes fai
 ## Architecture
 
 ```
-me_ops/              # Core Python package
-├── ingest.py        # Raw JSON → DuckDB normalized events
-├── entities.py      # Entity extraction + link tables
-├── workflows.py     # Session/sequence mining (networkx)
-├── mistakes.py      # Failure pattern detection + playbooks
-├── vectors.py       # Qdrant semantic search over events
-├── daily_report.py  # Automated daily metrics report
-├── queries.py       # 10 validation queries
-└── requirements.txt
+me_ops/                  # Project root (git repo)
+├── ingest.py            # Raw JSON → DuckDB normalized events
+├── __init__.py          # Python package marker
+├── requirements.txt     # Python dependencies
+├── pyrightconfig.json   # Type checking config
+├── .githooks/           # Pre-commit + commit-msg hooks
+├── .agent/workflows/    # Health check + inception workflows
+├── data/                # Processed data artifacts
+├── output/              # Generated reports
+└── Johnny Cage LTM/     # Life Intelligence Report
 ```
+
+> **Future modules:** `entities.py`, `workflows.py`, `mistakes.py`, `vectors.py`, `daily_report.py`, `queries.py`
 
 ## Data Sources
 
-19 Pieces LTM JSON exports (~65K records, ~416MB) + 1 Markdown intelligence report.
+19 Pieces LTM JSON exports (~65K records, ~416MB) stored in parent directory (`../`).
 
 ## Quick Start
 
 ```bash
 # Activate venv
-source me_ops/.venv/bin/activate
+source ../.venv/bin/activate
 
 # Run full ingestion pipeline
-python me_ops/ingest.py
+python ingest.py
 
-# Run validation queries
-python me_ops/queries.py
+# Run with custom paths
+python ingest.py --data-dir /path/to/json --db ./me_ops.duckdb
+```
 
-# Generate daily report
-python me_ops/daily_report.py
+## Health Check
+
+```bash
+# Run elite environment check
+ops-check
+
+# Or directly:
+~/.local/bin/elite-check /home/finan/dev/labs/me_ops
 ```
 
 ## Core Principle

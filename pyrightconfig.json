@@ -1,14 +1,16 @@
 {
   "pythonVersion": "3.12",
   "pythonPlatform": "Linux",
-  "venvPath": ".",
+  "venvPath": "..",
   "venv": ".venv",
   "include": ["."],
   "exclude": [
     ".venv",
     "__pycache__",
     "data",
-    "output"
+    "output",
+    "me_ops",
+    "Johnny Cage LTM"
   ],
   "typeCheckingMode": "basic",
   "reportMissingImports": true,

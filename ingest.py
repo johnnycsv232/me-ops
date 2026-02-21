@@ -28,7 +28,7 @@ import duckdb
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-DATA_DIR = Path(__file__).resolve().parent.parent  # repo root with JSONs
+DATA_DIR = Path(__file__).resolve().parent.parent  # /dev/labs/ where pieces_*.json live
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 
 SOURCE_FILES = [

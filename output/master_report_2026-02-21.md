@@ -1,6 +1,6 @@
 # ME-OPS ARCHITECT REPORT
 
-*Generated: 2026-02-21 18:50 CST*
+*Generated: 2026-02-21 19:47 CST*
 
 ---
 
@@ -152,11 +152,11 @@
 
 ## Insight Action Queue
 
-1. Decide explicitly: revive `IronClad::Content` this week or archive it to remove mental overhead. (impact: 8.0, conf: 0.80, novelty: recurring)
-2. Decide explicitly: revive `AI Arbitrage::Integration` this week or archive it to remove mental overhead. (impact: 8.0, conf: 0.80, novelty: recurring)
-3. Decide explicitly: revive `GettUpp::Marketing` this week or archive it to remove mental overhead. (impact: 8.0, conf: 0.80, novelty: recurring)
-4. Decide explicitly: revive `Cristina/KB-DS::Pattern` this week or archive it to remove mental overhead. (impact: 3.5, conf: 0.74, novelty: recurring)
-5. Run a controlled block this week combining `GettUpp::Infrastructure` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline. (impact: 2.2, conf: 0.90, novelty: recurring)
+1. Decide explicitly: revive `IronClad::Content` this week or archive it to remove mental overhead. (impact: 8.0, conf: 0.80, novelty: new)
+2. Decide explicitly: revive `AI Arbitrage::Integration` this week or archive it to remove mental overhead. (impact: 8.0, conf: 0.80, novelty: new)
+3. Decide explicitly: revive `GettUpp::Marketing` this week or archive it to remove mental overhead. (impact: 8.0, conf: 0.80, novelty: new)
+4. Decide explicitly: revive `Cristina/KB-DS::Pattern` this week or archive it to remove mental overhead. (impact: 3.5, conf: 0.74, novelty: new)
+5. Run a controlled block this week combining `GettUpp::Infrastructure` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline. (impact: 2.2, conf: 0.90, novelty: new)
 
 ---
 
@@ -167,4 +167,4 @@
 * Current problems:
   * Missing Site Attribution (medium, impact 55.6)
   * Query Attribution Blind Spot (high, impact 92.7)
-* Full report: `/home/finan/dev/labs/me_ops/output/action_site_insights_2026-02-20.md`
+* Full report: `/home/finan/dev/labs/me_ops/output/action_site_insights_2026-02-21.md`

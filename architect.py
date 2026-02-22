@@ -20,7 +20,7 @@ import sys
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import duckdb
 from dotenv import load_dotenv
@@ -110,6 +110,18 @@ def _init_schema(con: duckdb.DuckDBPyConnection) -> None:
         stmt = stmt.strip()
         if stmt:
             con.execute(stmt)
+
+
+def _table_exists(con: duckdb.DuckDBPyConnection, table_name: str) -> bool:
+    row = con.execute(
+        """
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_name = ?
+        """,
+        [table_name],
+    ).fetchone()
+    return bool(row and int(row[0]) > 0)
 
 
 # ---------------------------------------------------------------------------
@@ -417,17 +429,41 @@ def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, An
     })
 
     # Rule 2: Context switch limit
-    thrash = con.execute("""
-        SELECT COUNT(*) FROM sessions s
-        JOIN (SELECT session_id, COUNT(*) as cs FROM context_switches GROUP BY 1 HAVING COUNT(*) > 3) c
-        ON s.session_id = c.session_id
-    """).fetchone()[0]
+    if _table_exists(con, "context_switches"):
+        thrash_sql = (
+            "SELECT session_id, COUNT(*) FROM context_switches GROUP BY 1 HAVING COUNT(*) > 3"
+        )
+        thrash = con.execute(
+            """
+            SELECT COUNT(*) FROM sessions s
+            JOIN (SELECT session_id, COUNT(*) as cs FROM context_switches GROUP BY 1 HAVING COUNT(*) > 3) c
+            ON s.session_id = c.session_id
+            """
+        ).fetchone()[0]
+    elif _table_exists(con, "sessions"):
+        # Fallback: derive context-switch-heavy sessions from multi-project session strings.
+        thrash_sql = (
+            "SELECT session_id FROM sessions "
+            "WHERE projects IS NOT NULL "
+            "AND (length(projects) - length(replace(projects, ',', ''))) >= 3"
+        )
+        thrash = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM sessions
+            WHERE projects IS NOT NULL
+              AND (length(projects) - length(replace(projects, ',', ''))) >= 3
+            """
+        ).fetchone()[0]
+    else:
+        thrash_sql = None
+        thrash = 0
     rid += 1
     rules.append({
         "rule_id": rid,
         "category": "focus",
         "rule_text": "Limit project switches to 3 per session. Each switch costs ~23 min re-focus time.",
-        "evidence_sql": "SELECT session_id, COUNT(*) FROM context_switches GROUP BY 1 HAVING COUNT(*) > 3",
+        "evidence_sql": thrash_sql,
         "evidence_count": thrash,
         "severity": "high",
         "confidence": 0.85,
@@ -786,7 +822,7 @@ def write_to_db(
             """, improvement_rows)
         
         con.execute("COMMIT")
-        print(f"    -> Successfully wrote all phase data to DB")
+        print("    -> Successfully wrote all phase data to DB")
     except Exception as e:
         con.execute("ROLLBACK")
         print(f"    -> Error writing to DB: {e}", file=sys.stderr)

@@ -36,6 +36,18 @@ python ingest.py
 python ingest.py --data-dir /path/to/json --db ./me_ops.duckdb
 ```
 
+## Real Database Setup
+
+```bash
+# Create/initialize a persistent DB with all core schemas
+python scripts/setup_real_database.py
+
+# Optionally ingest data immediately
+python scripts/setup_real_database.py --ingest --data-dir /path/to/json/exports
+```
+
+The setup command uses `$ME_OPS_DB_PATH` when set; otherwise it defaults to `./me_ops.duckdb`.
+
 ## Health Check
 
 ```bash

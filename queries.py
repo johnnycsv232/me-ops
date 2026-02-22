@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import duckdb
+from typing import Optional
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 
@@ -84,14 +85,17 @@ QUERIES: list[tuple[str, str]] = [
 ]
 
 
-def run(db_path: Path) -> bool:
+def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     """Execute all validation queries and print results."""
-    if not db_path.exists():
-        print(f"❌ Database not found: {db_path}")
-        print("   Run ingest.py first.")
-        return False
+    local_con = False
+    if con is None:
+        if not db_path.exists():
+            print(f"❌ Database not found: {db_path}")
+            print("   Run ingest.py first.")
+            return False
+        con = duckdb.connect(str(db_path), read_only=True)
+        local_con = True
 
-    con = duckdb.connect(str(db_path), read_only=True)
     all_pass = True
 
     for title, sql in QUERIES:
@@ -120,7 +124,8 @@ def run(db_path: Path) -> bool:
             print(f"  ❌ ERROR: {e}")
             all_pass = False
 
-    con.close()
+    if local_con:
+        con.close()
     status = "✅ ALL QUERIES PASSED" if all_pass else "⚠️ SOME QUERIES FAILED"
     print(f"\n{'='*60}")
     print(f"  {status}")

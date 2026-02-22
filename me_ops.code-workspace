@@ -22,16 +22,44 @@
 		"python.venvFolders": [
 			".venv"
 		],
-		"pyrefly.searchRoot": "${workspaceFolder:ME-OPS}",
+		"python.testing.unittestArgs": [
+			"-v",
+			"-s",
+			"./tests",
+			"-p",
+			"*test*.py"
+		],
+		"python.testing.pytestEnabled": false,
+		"python.testing.unittestEnabled": true,
+		"pyre2.lspArguments": [
+			"lsp",
+			"--search-path",
+			"${workspaceFolder:ME-OPS}",
+			"--site-package-path",
+			"${workspaceFolder:ME-OPS}/.venv/lib/python3.12/site-packages"
+		],
 		"files.exclude": {
 			"**/.git": true,
 			"**/__pycache__": true,
 			"**/.venv": true,
-			"**/me_ops.duckdb.wal": true
+			"**/me_ops.duckdb.wal": true,
+			"**/me_ops": true
 		},
 		"search.exclude": {
 			"**/pieces_*.json": true,
-			"**/.venv": true
+			"**/.venv": true,
+			"**/me_ops": true
+		},
+		"files.associations": {
+			".env": "dotenv",
+			".env.*": "dotenv",
+			".gitmessage": "git-commit",
+			"COMMIT_EDITMSG": "git-commit",
+			"MERGE_MSG": "git-commit",
+			"PULLREQ_EDITMSG": "git-commit",
+			"TAG_EDITMSG": "git-commit",
+			"**/.githooks/*": "shellscript",
+			"requirements*.txt": "pip-requirements"
 		},
 		"editor.formatOnSave": true,
 		"[python]": {
@@ -46,7 +74,22 @@
 		},
 		"[markdown]": {
 			"editor.defaultFormatter": "vscode.markdown-language-features"
-		}
+		},
+		"duckdb.databases": [
+			{
+				"alias": "warehouse",
+				"type": "file",
+				"path": "${workspaceFolder:ME-OPS}/warehouse.duckdb",
+				"attached": false
+			},
+			{
+				"alias": "me_ops",
+				"type": "file",
+				"path": "${workspaceFolder:ME-OPS}/me_ops.duckdb",
+				"attached": false
+			}
+		],
+		"duckdb.defaultDatabase": "me_ops"
 	},
 	"extensions": {
 		"recommendations": [

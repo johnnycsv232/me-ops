@@ -15,8 +15,6 @@ Usage:
 import argparse
 import hashlib
 import json
-import os
-import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -304,10 +302,6 @@ def ingest_workstream_summaries(records: list[dict], source: str) -> list[tuple]
         ts_start = safe_ts(rec.get("created"))
         ts_end = safe_ts(rec.get("updated"))
 
-        # Build summary text from annotations if available
-        model = rec.get("model", {})
-        summary_text = None
-
         # The text content is in linked annotations, not directly here
         # Store event indices as metadata for linking
         events_indices = rec.get("events", {}).get("indices", {})
@@ -334,7 +328,6 @@ def ingest_websites(records: list[dict], source: str) -> list[tuple]:
         ts_start = safe_ts(rec.get("created"))
         ts_end = safe_ts(rec.get("updated"))
         url = rec.get("url", "")
-        name = rec.get("name", url)
         interactions = rec.get("interactions", 0)
 
         meta = {"url": url, "interactions": interactions}
@@ -711,7 +704,7 @@ def mine_subcategories(con: duckdb.DuckDBPyConnection) -> None:
 # ---------------------------------------------------------------------------
 def run(data_dir: Path, db_path: Path):
     """Execute full ingestion pipeline."""
-    print(f"ME-OPS Ingestion Pipeline")
+    print("ME-OPS Ingestion Pipeline")
     print(f"{'='*60}")
     print(f"Data dir : {data_dir}")
     print(f"DB path  : {db_path}")

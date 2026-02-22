@@ -28,6 +28,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import duckdb
+from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -442,7 +444,7 @@ def generate_blueprint(analysis: dict) -> str:
     lines.append("# ME-OPS DEEP ANALYSIS")
     lines.append("## Self-Architecture Blueprint")
     lines.append(f"*Generated: {datetime.now(CST).strftime('%Y-%m-%d %H:%M CST')}*")
-    lines.append(f"*Data: 28,013 events | 64 days | 206 sessions | Dec 2025 → Feb 2026*")
+    lines.append("*Data: 28,013 events | 64 days | 206 sessions | Dec 2025 → Feb 2026*")
     lines.append("")
 
     # ── SECTION 1: TEMPORAL SUPERPOWERS ──
@@ -711,56 +713,80 @@ Be specific. Use numbers. No generic advice."""
 # Main
 # ---------------------------------------------------------------------------
 
+def run(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnection] = None, ai: bool = False) -> dict:
+    """Run full analysis pipeline."""
+    print("ME-OPS Deep Analysis Engine")
+    print("=" * 60)
+
+    close_con = False
+    if con is None:
+        con = duckdb.connect(str(db_path), read_only=True)
+        close_con = True
+
+    try:
+        analysis = {
+            "temporal": analyze_temporal(con),
+            "flow_states": analyze_flow_states(con),
+            "failures": analyze_failures(con),
+            "success": analyze_success(con),
+            "hidden": analyze_hidden(con),
+        }
+
+        # Generate blueprint
+        blueprint = generate_blueprint(analysis)
+
+        # Optional AI narrative
+        ai_narrative = None
+        if ai:
+            print("  Generating AI narrative...")
+            ai_narrative = generate_ai_narrative(analysis)
+
+        if ai_narrative:
+            full_report = f"# 🧠 AI NARRATIVE\n\n{ai_narrative}\n\n---\n\n{blueprint}"
+        else:
+            full_report = blueprint
+
+        # Save
+        OUTPUT_DIR.mkdir(exist_ok=True)
+        today = datetime.now(CST).strftime("%Y-%m-%d")
+        out_file = OUTPUT_DIR / f"deep_analysis_{today}.md"
+        out_file.write_text(full_report, encoding="utf-8")
+        print(f"\n{'=' * 60}")
+        print(f"Saved to: {out_file}")
+
+        return {"report": full_report, "analysis": analysis}
+    finally:
+        if close_con:
+            con.close()
+
+
 def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="ME-OPS Deep Analysis")
     parser.add_argument("--json", action="store_true", help="JSON output")
     parser.add_argument("--ai", action="store_true", help="Add Gemini narrative")
+    parser.add_argument("--db", type=Path, default=DB_PATH)
     args = parser.parse_args()
 
-    print("ME-OPS Deep Analysis Engine")
-    print("=" * 60)
-
-    con = _connect()
-
-    analysis = {
-        "temporal": analyze_temporal(con),
-        "flow_states": analyze_flow_states(con),
-        "failures": analyze_failures(con),
-        "success": analyze_success(con),
-        "hidden": analyze_hidden(con),
-    }
-
-    con.close()
-
     if args.json:
-        print(json.dumps(analysis, indent=2, default=str))
+        close_con = False
+        con = duckdb.connect(str(args.db), read_only=True)
+        try:
+            analysis = {
+                "temporal": analyze_temporal(con),
+                "flow_states": analyze_flow_states(con),
+                "failures": analyze_failures(con),
+                "success": analyze_success(con),
+                "hidden": analyze_hidden(con),
+            }
+            print(json.dumps(analysis, indent=2, default=str))
+        finally:
+            con.close()
         return
 
-    # Generate blueprint
-    blueprint = generate_blueprint(analysis)
-
-    # Optional AI narrative
-    ai_narrative = None
-    if args.ai:
-        print("  Generating AI narrative...")
-        ai_narrative = generate_ai_narrative(analysis)
-
-    if ai_narrative:
-        full_report = f"# 🧠 AI NARRATIVE\n\n{ai_narrative}\n\n---\n\n{blueprint}"
-    else:
-        full_report = blueprint
-
-    print(full_report)
-
-    # Save
-    OUTPUT_DIR.mkdir(exist_ok=True)
-    today = datetime.now(CST).strftime("%Y-%m-%d")
-    out_file = OUTPUT_DIR / f"deep_analysis_{today}.md"
-    out_file.write_text(full_report, encoding="utf-8")
-    print(f"\n{'=' * 60}")
-    print(f"Saved to: {out_file}")
+    res = run(args.db, ai=args.ai)
+    print(res["report"])
 
 
 if __name__ == "__main__":

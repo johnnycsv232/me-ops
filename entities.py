@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 import duckdb
+from typing import Optional
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 
@@ -58,15 +59,18 @@ CREATE TABLE IF NOT EXISTS tag_stats (
 """
 
 
-def run(db_path: Path) -> bool:
+def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     """Build entity cross-reference tables."""
-    if not db_path.exists():
-        print(f"❌ Database not found: {db_path}")
-        return False
-
-    con = duckdb.connect(str(db_path))
     print("ME-OPS Entity Extraction")
     print("=" * 60)
+
+    local_con = False
+    if con is None:
+        if not db_path.exists():
+            print(f"❌ Database not found: {db_path}")
+            return False
+        con = duckdb.connect(str(db_path))
+        local_con = True
 
     # Create schema
     for stmt in ENTITY_DDL.split(";"):
@@ -167,7 +171,7 @@ def run(db_path: Path) -> bool:
     for r in rows:
         print(f"    [{r[0]:<8}] {r[1]:<30} {r[2]:>6} events")
 
-    print(f"\n  TOP TAGS:")
+    print("\n  TOP TAGS:")
     rows = con.execute("""
         SELECT tag_text, event_count FROM tag_stats
         ORDER BY event_count DESC LIMIT 10
@@ -175,7 +179,8 @@ def run(db_path: Path) -> bool:
     for r in rows:
         print(f"    {r[0]:<40} {r[1]:>6} events")
 
-    con.close()
+    if local_con:
+        con.close()
     print(f"\n{'='*60}")
     print("✅ Entity extraction complete")
     return True

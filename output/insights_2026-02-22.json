@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-22T00:50:38.295287+00:00",
+  "generated_at": "2026-02-22T11:41:18.086544+00:00",
   "memory_mode": "persistent",
   "coverage": {
     "events_count": 28013,
@@ -34,7 +34,7 @@
       "evidence_key": "IronClad::Content",
       "insight_key": "056d0621b80a74e580529f0f112b0c903ae478ec",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "signal_drift",
@@ -57,7 +57,7 @@
       "evidence_key": "AI Arbitrage::Integration",
       "insight_key": "c1974fbda83d1d64d0264924aa121bc208f32022",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "signal_drift",
@@ -80,7 +80,7 @@
       "evidence_key": "GettUpp::Marketing",
       "insight_key": "b92b3aab19b45175bf0e2d147d191ab358765d0b",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "signal_drift",
@@ -103,7 +103,7 @@
       "evidence_key": "Cristina/KB-DS::Pattern",
       "insight_key": "868357d6609b63605f8a050ec979c280babf02c3",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -113,8 +113,8 @@
         "signal_a": "GettUpp::Infrastructure",
         "signal_b": "Miscellaneous::General",
         "support_days": 61,
-        "recent_support_days": 23,
-        "recency_ratio": 0.38,
+        "recent_support_days": 22,
+        "recency_ratio": 0.36,
         "avg_with_pair": 5.079,
         "avg_without_pair": 2.5,
         "avg_signal_a_present": 5.079,
@@ -208,7 +208,7 @@
       "evidence_key": "GettUpp::Infrastructure|Miscellaneous::General",
       "insight_key": "60b40bd9aee26d848c512e1d644177b4b7cf9453",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -313,7 +313,7 @@
       "evidence_key": "AI Arbitrage::Automation|Cristina/KB-DS::Truth",
       "insight_key": "a56750d291712701e9ddaccca6ddb514c1dee723",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -418,7 +418,7 @@
       "evidence_key": "AI Arbitrage::Integration|Cristina/KB-DS::Memory",
       "insight_key": "d61698252cab0904e6db2612c940ad5128da78e2",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -523,7 +523,7 @@
       "evidence_key": "Cristina/KB-DS::Memory|Cristina/KB-DS::Truth",
       "insight_key": "3d50e4466c8ed65951942ae6d04dba94b33e7d86",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -628,7 +628,7 @@
       "evidence_key": "AI Arbitrage::Integration|Cristina/KB-DS::Truth",
       "insight_key": "4430c368408d361bfbfcce57f92127ded191dcb4",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -638,8 +638,8 @@
         "signal_a": "GettUpp::Infrastructure",
         "signal_b": "GettUpp::UI/UX",
         "support_days": 58,
-        "recent_support_days": 23,
-        "recency_ratio": 0.4,
+        "recent_support_days": 22,
+        "recency_ratio": 0.38,
         "avg_with_pair": 5.122,
         "avg_without_pair": 3.54,
         "avg_signal_a_present": 5.079,
@@ -733,7 +733,7 @@
       "evidence_key": "GettUpp::Infrastructure|GettUpp::UI/UX",
       "insight_key": "dfd4d0b7ae7a2479b9c92b54db24878b520adfb5",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -838,7 +838,7 @@
       "evidence_key": "Cristina/KB-DS::Truth|GettUpp::Product",
       "insight_key": "1491a96e8199b930b5add67b0aa644b26a21b36b",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     },
     {
       "type": "connection",
@@ -943,7 +943,7 @@
       "evidence_key": "Cristina/KB-DS::Truth|IronClad::Sales",
       "insight_key": "13a43ea29aed3845feafaf5428d80dd66411b8e6",
       "novelty": "recurring",
-      "previous_occurrences": 4
+      "previous_occurrences": 1
     }
   ],
   "action_queue": [

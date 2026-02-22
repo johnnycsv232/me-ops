@@ -1,29 +1,49 @@
 {
   "project_name": "me_ops",
-  "version": "1.0.0",
-  "structure": {
-    "directories": [
-      "data",
-      "output",
-      "scripts",
-      "tests",
-      "sources",
-      ".githooks"
-    ],
-    "critical_files": [
-      "me_ops.duckdb",
-      "architect.py",
-      "agent.py",
-      "deep_analysis.py",
-      "prompts.py",
-      ".env"
-    ]
+  "standards": "Elite-Level-10-Baseline v1.0",
+  "mandatory_structure": [
+    "data",
+    "output",
+    "scripts",
+    "tests",
+    ".antigravity/skills",
+    ".agent/workflows"
+  ],
+  "mandatory_files": [
+    ".gitignore",
+    "README.md",
+    "requirements.txt",
+    "pyrightconfig.json"
+  ],
+  "required_tools": {
+    "python": ">=3.12",
+    "ruff": ">=0.1",
+    "mypy": ">=1.0",
+    "duckdb": ">=1.0"
   },
-  "git_config": {
-    "pull.rebase": true,
-    "fetch.prune": true,
-    "rerere.enabled": true,
-    "core.hooksPath": ".githooks"
+  "quality_gates": {
+    "linting": "ruff check",
+    "types": "mypy .",
+    "hardening": "custom_audit"
   },
-  "hardened": true
+  "ide_configs": {
+    "vscode": {
+      "files": [".vscode/settings.json", ".vscode/extensions.json"],
+      "required_extensions": ["ms-python.python", "charliermarsh.ruff"]
+    },
+    "windsurf": {
+      "files": [".windsurfrules"]
+    },
+    "antigravity": {
+      "files": [".antigravity/rules.md"]
+    }
+  },
+  "infrastructure": {
+    "python": {
+      "venv": ".venv",
+      "required_symlinks": [
+        { "src": ".env", "dest": "global.env" }
+      ]
+    }
+  }
 }

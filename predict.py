@@ -18,13 +18,11 @@ Usage:
 """
 from __future__ import annotations
 
-import json
-import sys
-from datetime import datetime
 from pathlib import Path
 
 import duckdb
 import numpy as np
+from typing import Optional
 
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 
@@ -58,7 +56,6 @@ def build_prediction_features(con: duckdb.DuckDBPyConnection) -> dict:
         ORDER BY ts_start
     """).fetchdf()
 
-    import pandas as pd
 
     if len(df) < 10:
         print("  WARNING: Not enough sessions for training (<10)")
@@ -275,27 +272,43 @@ def save_predictions(
 # Main
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+def run(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnection] = None) -> dict:
+    """Train and evaluate prediction models."""
     print("ME-OPS Predictive Modeling")
     print("=" * 60)
 
-    con = duckdb.connect(str(DB_PATH))
+    close_con = False
+    if con is None:
+        con = duckdb.connect(str(db_path))
+        close_con = True
 
-    print("  Building features from sessions...")
-    data = build_prediction_features(con)
+    try:
+        print("  Building features from sessions...")
+        data = build_prediction_features(con)
 
-    if not data:
-        con.close()
-        return
+        if not data:
+            return {}
 
-    print(f"  {len(data['session_ids'])} sessions, {data['X'].shape[1]} features")
+        print(f"  {len(data['session_ids'])} sessions, {data['X'].shape[1]} features")
 
-    results = train_and_evaluate(data)
-    print_feature_importance(results)
-    save_predictions(con, data, results)
+        results = train_and_evaluate(data)
+        print_feature_importance(results)
+        save_predictions(con, data, results)
+    finally:
+        if close_con:
+            con.close()
 
-    con.close()
     print("\n✅ Prediction models trained and evaluated")
+    return results
+
+
+def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="ME-OPS Predictive Modeling")
+    parser.add_argument("--db", type=str, default=str(DB_PATH), help="Path to DuckDB")
+    args = parser.parse_args()
+
+    run(Path(args.db))
 
 
 if __name__ == "__main__":

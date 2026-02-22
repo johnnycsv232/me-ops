@@ -17,12 +17,18 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+from urllib.parse import urlparse
 
 import duckdb
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from action_site_insights import infer_site
 
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
@@ -55,7 +61,8 @@ CREATE TABLE IF NOT EXISTS workflow_dna_profiles (
 """
 
 RESEARCH_STAGES = {"notion", "web", "local_web", "github", "query", "framing"}
-SYNTHESIS_STAGES = {"synthesis"}
+SYNTHESIS_STAGES = {"synthesis", "rebuilding"}
+ENVIRONMENT_STAGES = {"environment"}
 CODE_EXTENSIONS = {
     "py",
     "ts",
@@ -88,6 +95,8 @@ TRANSITION_NAMES: Dict[Tuple[str, str], str] = {
     ("query", "synthesis"): "Direct Synthesis Jump",
     ("synthesis", "code"): "Insight-to-Build Handoff",
     ("code", "synthesis"): "Build-to-Document Feedback",
+    ("environment", "code"): "Setup-to-Execution Transition",
+    ("rebuilding", "code"): "Strategy-to-Code Transition",
 }
 
 
@@ -143,13 +152,19 @@ def classify_stage(action: object, target: object = None, app_tool: object = Non
     if "python" in target_l or _extract_extension(target_l) in CODE_EXTENSIONS:
         return "code"
 
-    if "vscode" in app_tool_l:
+    if "vscode" in app_tool_l or "antigravity" in app_tool_l:
         return "code"
+
+    if any(term in target_l for term in ["setup", "install", "config", "env", "venv", ".git"]):
+        return "environment"
+
+    if "rebuild" in target_l or "reconstruct" in target_l:
+        return "rebuilding"
 
     return "activity"
 
 
-def _sort_events(events: Sequence[Dict[str, object]]) -> List[Dict[str, object]]:
+def _sort_events(events: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     def _key(event: Dict[str, object]) -> datetime:
         ts = event.get("ts_start")
         if isinstance(ts, datetime):
@@ -165,8 +180,8 @@ def _sort_events(events: Sequence[Dict[str, object]]) -> List[Dict[str, object]]
 
 
 def _sessionize(
-    events: Sequence[Dict[str, object]], gap_minutes: int = 30
-) -> List[List[Dict[str, object]]]:
+    events: Sequence[Dict[str, Any]], gap_minutes: int = 30
+) -> List[List[Dict[str, Any]]]:
     ordered = _sort_events(events)
     if not ordered:
         return []
@@ -174,7 +189,8 @@ def _sessionize(
     sessions: List[List[Dict[str, object]]] = [[ordered[0]]]
     gap_sec_threshold = float(gap_minutes * 60)
 
-    for prev, curr in zip(ordered[:-1], ordered[1:]):
+    ordered_list = list(ordered)
+    for prev, curr in zip(ordered_list[:-1], ordered_list[1:]):
         prev_ts = prev.get("ts_start")
         curr_ts = curr.get("ts_start")
         if isinstance(prev_ts, datetime) and isinstance(curr_ts, datetime):
@@ -195,14 +211,14 @@ def _sessionize(
 # ---------------------------------------------------------------------------
 
 def extract_genetic_markers(
-    events: Sequence[Dict[str, object]], top_n: int = 8
-) -> List[Dict[str, object]]:
+    events: Sequence[Dict[str, Any]], top_n: int = 8
+) -> List[Dict[str, Any]]:
     """Extract high-signal transition markers from event stage changes."""
     ordered = _sort_events(events)
     if len(ordered) < 2:
         return []
 
-    transition_stats: Dict[Tuple[str, str], Dict[str, object]] = {}
+    transition_stats: Dict[Tuple[str, str], Dict[str, Any]] = {}
     triads: Counter[Tuple[str, str, str]] = Counter()
 
     stages = [
@@ -211,9 +227,11 @@ def extract_genetic_markers(
     ]
 
     for idx in range(2, len(stages)):
-        triads[(stages[idx - 2], stages[idx - 1], stages[idx])] += 1
+        key = (stages[idx - 2], stages[idx - 1], stages[idx])
+        triads[key] = triads[key] + 1
 
-    for prev, curr in zip(ordered[:-1], ordered[1:]):
+    ordered_list = list(ordered)
+    for prev, curr in zip(ordered_list[:-1], ordered_list[1:]):
         src = classify_stage(prev.get("action"), prev.get("target"), prev.get("app_tool"))
         dst = classify_stage(curr.get("action"), curr.get("target"), curr.get("app_tool"))
 
@@ -237,8 +255,8 @@ def extract_genetic_markers(
                 "days": set(),
             },
         )
-        stats["count"] = int(stats["count"]) + 1
-        stats["gap_sum"] = float(stats["gap_sum"]) + gap
+        stats["count"] = int(float(stats.get("count", 0))) + 1
+        stats["gap_sum"] = float(stats.get("gap_sum", 0.0)) + float(gap)
         days = stats["days"]
         if isinstance(days, set):
             days.add(day_key)
@@ -246,8 +264,8 @@ def extract_genetic_markers(
     if not transition_stats:
         return []
 
-    max_count = max(int(v["count"]) for v in transition_stats.values())
-    markers: List[Dict[str, object]] = []
+    max_count = max(int(float(v.get("count", 1))) for v in transition_stats.values())
+    markers: List[Dict[str, Any]] = []
 
     for (src, dst), stats in transition_stats.items():
         count = int(stats["count"])
@@ -266,10 +284,12 @@ def extract_genetic_markers(
         speed_score = max(0.0, 1.0 - (avg_gap / 600.0))
         triad_score = min(1.0, triad_support / max(1, count * 2))
         strength = round(
-            (freq_score * 0.5)
-            + (coverage_score * 0.2)
-            + (speed_score * 0.15)
-            + (triad_score * 0.15),
+            float(
+                (freq_score * 0.5)
+                + (coverage_score * 0.2)
+                + (speed_score * 0.15)
+                + (triad_score * 0.15)
+            ),
             3,
         )
 
@@ -279,25 +299,26 @@ def extract_genetic_markers(
                 "transition": f"{src} -> {dst}",
                 "frequency": count,
                 "support_days": support_days,
-                "avg_gap_sec": round(avg_gap, 1),
+                "avg_gap_sec": round(float(avg_gap), 1),
                 "triad_support": triad_support,
                 "strength": strength,
             }
         )
 
-    markers.sort(
+    markers_list = list(markers)
+    markers_list.sort(
         key=lambda item: (
-            float(item["strength"]),
-            int(item["frequency"]),
-            -float(item["avg_gap_sec"]),
+            float(item.get("strength", 0.0)),
+            int(float(item.get("frequency", 0))),
+            -float(item.get("avg_gap_sec", 0.0)),
         ),
         reverse=True,
     )
 
-    return markers[:top_n]
+    return markers_list[:top_n]
 
 
-def _prompt_fingerprint(events: Sequence[Dict[str, object]]) -> Dict[str, float]:
+def _prompt_fingerprint(events: Sequence[Dict[str, Any]]) -> Dict[str, float]:
     queries: List[str] = []
     for event in events:
         action = _safe_text(event.get("action")).lower()
@@ -379,17 +400,17 @@ def _prompt_fingerprint(events: Sequence[Dict[str, object]]) -> Dict[str, float]
     n = float(len(queries))
     return {
         "query_count": n,
-        "avg_words": round(total_words / max(n, 1.0), 2),
-        "question_ratio": round(question_like / max(n, 1.0), 3),
-        "evidence_seeking_ratio": round(evidence_hits / max(n, 1.0), 3),
-        "systems_language_ratio": round(systems_hits / max(n, 1.0), 3),
-        "imperative_ratio": round(imperative_hits / max(n, 1.0), 3),
+        "avg_words": round(float(total_words / max(n, 1.0)), 2),
+        "question_ratio": round(float(question_like / max(n, 1.0)), 3),
+        "evidence_seeking_ratio": round(float(evidence_hits / max(n, 1.0)), 3),
+        "systems_language_ratio": round(float(systems_hits / max(n, 1.0)), 3),
+        "imperative_ratio": round(float(imperative_hits / max(n, 1.0)), 3),
     }
 
 
 def profile_creation_style(
-    events: Sequence[Dict[str, object]], markers: Sequence[Dict[str, object]]
-) -> Dict[str, object]:
+    events: Sequence[Dict[str, Any]], markers: Sequence[Dict[str, Any]]
+) -> Dict[str, Any]:
     """Generate a style profile from event flow and prompt semantics."""
     ordered = _sort_events(events)
     if not ordered:
@@ -427,7 +448,7 @@ def profile_creation_style(
         for i, stage in enumerate(stages):
             if stage in RESEARCH_STAGES:
                 closure_opportunities += 1
-                window = stages[i + 1 : i + 6]
+                window = list(stages)[i + 1 : i + 6]
                 if any(w in SYNTHESIS_STAGES for w in window):
                     closure_hits += 1
 
@@ -469,11 +490,11 @@ def profile_creation_style(
         style_scores["Adaptive Multi-Modal Execution"] = 0.5
 
     unique_style = [
-        name
+        str(name)
         for name, _ in sorted(style_scores.items(), key=lambda item: item[1], reverse=True)
     ][:4]
 
-    top_marker = markers[0]["transition"] if markers else "none"
+    top_marker = markers[0]["transition"] if markers else "query -> synthesis"
     orchestration_signature = (
         f"{top_marker}; closure={closure_ratio:.0%}; query_ladder={query_ladder_ratio:.0%}"
     )
@@ -482,18 +503,18 @@ def profile_creation_style(
         "unique_style": unique_style,
         "metrics": {
             "sessions": total_sessions,
-            "notion_first_ratio": round(notion_first_ratio, 3),
-            "closure_ratio": round(closure_ratio, 3),
-            "query_ladder_ratio": round(query_ladder_ratio, 3),
-            "synthesis_share": round(synthesis_share, 3),
-            "web_share": round(web_share, 3),
+            "notion_first_ratio": round(float(notion_first_ratio), 3),
+            "closure_ratio": round(float(closure_ratio), 3),
+            "query_ladder_ratio": round(float(query_ladder_ratio), 3),
+            "synthesis_share": round(float(synthesis_share), 3),
+            "web_share": round(float(web_share), 3),
         },
         "prompt_fingerprint": prompt_fp,
         "orchestration_signature": orchestration_signature,
     }
 
 
-def detect_bottlenecks(events: Sequence[Dict[str, object]]) -> List[Dict[str, object]]:
+def detect_bottlenecks(events: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Detect efficiency bottlenecks from stage dynamics."""
     ordered = _sort_events(events)
     if not ordered:
@@ -504,7 +525,7 @@ def detect_bottlenecks(events: Sequence[Dict[str, object]]) -> List[Dict[str, ob
         for e in ordered
     ]
 
-    bottlenecks: List[Dict[str, object]] = []
+    bottlenecks: List[Dict[str, Any]] = []
 
     # Browser drift: long consecutive web streaks.
     web_runs: List[int] = []
@@ -522,7 +543,7 @@ def detect_bottlenecks(events: Sequence[Dict[str, object]]) -> List[Dict[str, ob
     if web_runs:
         total_drift_events = sum(web_runs)
         avg_run = total_drift_events / max(len(web_runs), 1)
-        impact = round(total_drift_events * 0.7 + avg_run * 2.0, 2)
+        impact = round(float(total_drift_events * 0.7 + avg_run * 2.0), 2)
         bottlenecks.append(
             {
                 "name": "Browser Drift",
@@ -553,7 +574,7 @@ def detect_bottlenecks(events: Sequence[Dict[str, object]]) -> List[Dict[str, ob
 
     if query_runs:
         total_query = sum(query_runs)
-        impact = round(total_query * 0.45 + len(query_runs) * 3.0, 2)
+        impact = round(float(total_query * 0.45 + len(query_runs) * 3.0), 2)
         bottlenecks.append(
             {
                 "name": "Query Loop Fatigue",
@@ -582,7 +603,7 @@ def detect_bottlenecks(events: Sequence[Dict[str, object]]) -> List[Dict[str, ob
         closure_ratio = closures / opportunities
         if closure_ratio < 0.35:
             missing = opportunities - closures
-            impact = round(missing * 1.2, 2)
+            impact = round(float(missing * 1.2), 2)
             bottlenecks.append(
                 {
                     "name": "Low Research Closure",
@@ -597,15 +618,371 @@ def detect_bottlenecks(events: Sequence[Dict[str, object]]) -> List[Dict[str, ob
                 }
             )
 
-    bottlenecks.sort(key=lambda b: float(b["impact_score"]), reverse=True)
-    return bottlenecks[:5]
+    bottlenecks_list = list(bottlenecks)
+    bottlenecks_list.sort(key=lambda b: float(b.get("impact_score", 0.0)), reverse=True)
+    return bottlenecks_list[:5]
+
+
+def _parse_transition(value: object) -> Tuple[str, str]:
+    text = _safe_text(value).strip().lower()
+    if "->" not in text:
+        return "", ""
+    src, dst = text.split("->", 1)
+    return src.strip(), dst.strip()
+
+
+def _clip(text: str, max_len: int = 100) -> str:
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3] + "..."
+
+
+def _infer_web_intent(target: str) -> str:
+    text = (target or "").strip().lower()
+    if not text:
+        return "unknown"
+
+    if not text.startswith("http://") and not text.startswith("https://"):
+        if "search" in text:
+            return "search"
+        if "docs" in text:
+            return "docs_read"
+        return "unstructured_target"
+
+    try:
+        parsed = urlparse(text)
+    except Exception:
+        return "unknown"
+
+    host = parsed.netloc.lower()
+    path = parsed.path.lower()
+    query = parsed.query.lower()
+
+    if "localhost" in host or "127.0.0.1" in host:
+        return "local_debug"
+    if any(token in path for token in ["/signin", "/login", "/auth", "/oauth"]):
+        return "auth_flow"
+    if "googleapis.com" in host or host.startswith("api."):
+        return "api_call"
+    if any(token in path for token in ["/dashboard", "/console", "/settings", "/admin", "/workbench"]):
+        return "dashboard_ops"
+    if "youtube.com" in host or "/watch" in path:
+        return "video_review"
+    if any(token in path for token in ["/issues", "/pull", "/pulls", "/blob", "/tree", "/commit"]):
+        return "repo_review"
+    if host.startswith("docs.") or "/docs" in path or "/documentation" in path:
+        return "docs_read"
+    if any(token in path for token in ["/search", "/find"]) or "q=" in query or "query=" in query:
+        return "search"
+    return "page_visit"
+
+
+def _resolve_contextual_destination(
+    ordered: Sequence[Dict[str, object]],
+    stages: Sequence[str],
+    idx: int,
+) -> Tuple[str, str, str, str]:
+    """Resolve destination + intent for an event, using nearby web context when needed."""
+    event = ordered[idx]
+    stage = stages[idx]
+    target = _safe_text(event.get("target")).strip()
+    metadata_text = _safe_text(event.get("metadata_text")).strip()
+    app_tool = _safe_text(event.get("app_tool")).strip() or "n/a"
+
+    if stage in {"web", "local_web"}:
+        destination = infer_site(target, metadata_text) or "unknown"
+        return destination, _infer_web_intent(target), app_tool, _clip(target or metadata_text or "n/a", 120)
+
+    # Non-web stages: anchor to nearest web event for concrete context.
+    for radius in (1, 2, 3):
+        for j in (idx - radius, idx + radius):
+            if j < 0 or j >= len(ordered):
+                continue
+            if stages[j] not in {"web", "local_web"}:
+                continue
+            web_event = ordered[j]
+            web_target = _safe_text(web_event.get("target")).strip()
+            web_metadata = _safe_text(web_event.get("metadata_text")).strip()
+            destination = infer_site(web_target, web_metadata) or "unknown"
+            return (
+                destination,
+                f"context_{stage}",
+                app_tool,
+                _clip(web_target or web_metadata or target or "n/a", 120),
+            )
+
+    return (
+        stage or "activity",
+        f"stage_{stage or 'activity'}",
+        app_tool,
+        _clip(target or metadata_text or "n/a", 120),
+    )
+
+
+def _summarize_indices_as_activity(
+    ordered: Sequence[Dict[str, Any]],
+    stages: Sequence[str],
+    indices: Sequence[int],
+    top_items: int = 8,
+) -> List[Dict[str, Any]]:
+    destination_counts: Counter[str] = Counter()
+    destination_intents: Dict[str, Counter[str]] = defaultdict(Counter)
+    destination_next_steps: Dict[str, Counter[str]] = defaultdict(Counter)
+    destination_next_gap_sum: Dict[str, float] = {}
+    destination_next_gap_count: Counter[str] = Counter()
+    destination_tools: Dict[str, Counter[str]] = defaultdict(Counter)
+    destination_examples: Dict[str, str] = {}
+
+    for idx in indices:
+        if idx < 0 or idx >= len(ordered):
+            continue
+
+        destination, intent, app_tool, sample_target = _resolve_contextual_destination(
+            ordered, stages, idx
+        )
+        destination_counts[destination] += 1
+        destination_intents[destination][intent] += 1
+        destination_tools[destination][app_tool] += 1
+        if destination not in destination_examples:
+            destination_examples[destination] = sample_target
+
+        if idx + 1 < len(ordered):
+            nxt = ordered[idx + 1]
+            next_action = _safe_text(nxt.get("action")).strip() or "unknown_action"
+            next_stage = stages[idx + 1]
+            destination_next_steps[destination][f"{next_action} ({next_stage})"] += 1
+
+            curr_ts = ordered[idx].get("ts_start")
+            next_ts = nxt.get("ts_start")
+            if isinstance(curr_ts, datetime) and isinstance(next_ts, datetime):
+                gap = max(0.0, (next_ts - curr_ts).total_seconds())
+                destination_next_gap_sum[destination] = destination_next_gap_sum.get(destination, 0.0) + float(gap)
+                destination_next_gap_count[destination] += 1
+
+    total = sum(destination_counts.values())
+    if total == 0:
+        return []
+
+    rows: List[Dict[str, object]] = []
+    for destination, count in destination_counts.most_common(top_items):
+        intent_counter = destination_intents.get(destination, Counter())
+        next_counter = destination_next_steps.get(destination, Counter())
+        tool_counter = destination_tools.get(destination, Counter())
+        rows.append(
+            {
+                "destination": destination,
+                "count": count,
+                "share_pct": round(float(100.0 * count) / max(total, 1), 1),
+                "top_intent": intent_counter.most_common(1)[0][0] if intent_counter else "unknown",
+                "top_next_step": next_counter.most_common(1)[0][0] if next_counter else "n/a",
+                "avg_next_gap_sec": (
+                    round(
+                        float(destination_next_gap_sum[destination])
+                        / max(float(destination_next_gap_count[destination]), 1.0),
+                        1,
+                    )
+                    if destination_next_gap_count[destination] > 0
+                    else "n/a"
+                ),
+                "top_app_tool": tool_counter.most_common(1)[0][0] if tool_counter else "n/a",
+                "sample_target": destination_examples.get(destination, "n/a"),
+            }
+        )
+    return list(rows)
+
+
+def build_current_problem_breakdowns(
+    events: Sequence[Dict[str, Any]],
+    bottlenecks: Sequence[Dict[str, Any]],
+    top_items: int = 8,
+) -> List[Dict[str, Any]]:
+    """Attach concrete activity/site detail to each current problem."""
+    ordered = _sort_events(events)
+    if not ordered or not bottlenecks:
+        return []
+
+    stages = [
+        classify_stage(e.get("action"), e.get("target"), e.get("app_tool"))
+        for e in ordered
+    ]
+
+    problems: List[Dict[str, Any]] = []
+    for bottleneck in bottlenecks:
+        name = _safe_text(bottleneck.get("name"))
+        indices: List[int] = []
+
+        if name == "Browser Drift":
+            run: List[int] = []
+            for i, stage in enumerate(stages):
+                if stage in {"web", "local_web"}:
+                    run.append(i)
+                else:
+                    if len(run) >= 3:
+                        indices.extend(run)
+                    run = []
+            if len(run) >= 3:
+                indices.extend(run)
+
+        elif name == "Query Loop Fatigue":
+            run = []
+            for i, stage in enumerate(stages):
+                if stage in {"query", "framing"}:
+                    run.append(i)
+                else:
+                    if len(run) >= 4:
+                        indices.extend(run)
+                    run = []
+            if len(run) >= 4:
+                indices.extend(run)
+
+        elif name == "Low Research Closure":
+            for i, stage in enumerate(stages):
+                if stage not in RESEARCH_STAGES:
+                    continue
+                window = list(stages)[i + 1 : i + 8]
+                if not any(w in SYNTHESIS_STAGES for w in window):
+                    indices.append(i)
+
+        activity_breakdown = _summarize_indices_as_activity(
+            ordered, stages, indices, top_items=top_items
+        )
+
+        problems.append(
+            {
+                "name": bottleneck.get("name"),
+                "severity": bottleneck.get("severity"),
+                "impact_score": bottleneck.get("impact_score"),
+                "evidence": bottleneck.get("evidence"),
+                "recommendation": bottleneck.get("recommendation"),
+                "sample_count": len(indices),
+                "activity_breakdown": activity_breakdown,
+            }
+        )
+
+    return problems
+
+
+def extract_web_transition_breakdowns(
+    events: Sequence[Dict[str, Any]],
+    markers: Sequence[Dict[str, Any]],
+    top_destinations: int = 8,
+) -> List[Dict[str, Any]]:
+    """Break down web-ending transitions into concrete destinations/tools."""
+    if len(events) < 2 or not markers:
+        return []
+
+    ordered = _sort_events(events)
+    selected: List[Tuple[Dict[str, Any], str, str]] = []
+
+    for marker in markers:
+        src, dst = _parse_transition(marker.get("transition"))
+        if dst in {"web", "local_web"} and src:
+            selected.append((dict(marker), src, dst))
+
+    if not selected:
+        return []
+
+    breakdowns: List[Dict[str, Any]] = []
+
+    for marker, src_filter, dst_filter in selected:
+        destination_counts: Counter[str] = Counter()
+        destination_tools: Dict[str, Counter[str]] = defaultdict(Counter)
+        destination_intents: Dict[str, Counter[str]] = defaultdict(Counter)
+        destination_next_steps: Dict[str, Counter[str]] = defaultdict(Counter)
+        destination_next_gap_sum: Dict[str, float] = {}
+        destination_next_gap_count: Counter[str] = Counter()
+        destination_examples: Dict[str, str] = {}
+        total_hops = 0
+
+        for idx in range(len(ordered) - 1):
+            prev = ordered[idx]
+            curr = ordered[idx + 1]
+            src = classify_stage(prev.get("action"), prev.get("target"), prev.get("app_tool"))
+            dst = classify_stage(curr.get("action"), curr.get("target"), curr.get("app_tool"))
+            if src != src_filter or dst != dst_filter:
+                continue
+
+            total_hops += 1
+            target = _safe_text(curr.get("target")).strip()
+            metadata_text = _safe_text(curr.get("metadata_text")).strip()
+            destination = infer_site(target, metadata_text)
+            if not destination:
+                destination = "unknown"
+
+            destination_counts[destination] += 1
+            app_tool = _safe_text(curr.get("app_tool")).strip() or "n/a"
+            destination_tools[destination][app_tool] += 1
+            destination_intents[destination][_infer_web_intent(target)] += 1
+
+            if destination not in destination_examples:
+                sample = target or metadata_text or "n/a"
+                destination_examples[destination] = _clip(sample, 120)
+
+            if idx + 2 < len(ordered):
+                nxt = ordered[idx + 2]
+                next_action = _safe_text(nxt.get("action")).strip() or "unknown_action"
+                next_stage = classify_stage(
+                    nxt.get("action"), nxt.get("target"), nxt.get("app_tool")
+                )
+                destination_next_steps[destination][f"{next_action} ({next_stage})"] += 1
+
+                curr_ts = curr.get("ts_start")
+                next_ts = nxt.get("ts_start")
+                if isinstance(curr_ts, datetime) and isinstance(next_ts, datetime):
+                    gap = max(0.0, (next_ts - curr_ts).total_seconds())
+                    destination_next_gap_sum[destination] = destination_next_gap_sum.get(destination, 0.0) + float(gap)
+                    destination_next_gap_count[destination] += 1
+
+        if total_hops == 0:
+            continue
+
+        destinations: List[Dict[str, Any]] = []
+        for destination, count in destination_counts.most_common(top_destinations):
+            tool_counter = destination_tools.get(destination, Counter())
+            intent_counter = destination_intents.get(destination, Counter())
+            next_counter = destination_next_steps.get(destination, Counter())
+            top_tool = tool_counter.most_common(1)[0][0] if tool_counter else "n/a"
+            top_intent = intent_counter.most_common(1)[0][0] if intent_counter else "unknown"
+            top_next_step = next_counter.most_common(1)[0][0] if next_counter else "n/a"
+            avg_next_gap_sec = (
+                round(
+                    float(destination_next_gap_sum.get(destination, 0.0))
+                    / max(float(destination_next_gap_count.get(destination, 1)), 1.0),
+                    1,
+                )
+                if destination_next_gap_count.get(destination, 0) > 0
+                else None
+            )
+            destinations.append(
+                {
+                    "destination": destination,
+                    "count": count,
+                    "share_pct": round(float(100.0 * count) / max(total_hops, 1), 1),
+                    "top_app_tool": top_tool,
+                    "top_intent": top_intent,
+                    "top_next_step": top_next_step,
+                    "avg_next_gap_sec": avg_next_gap_sec,
+                    "sample_target": destination_examples.get(destination, "n/a"),
+                }
+            )
+
+        breakdowns.append(
+            {
+                "name": marker.get("name", f"{src_filter.title()} -> {dst_filter.title()}"),
+                "transition": marker.get("transition", f"{src_filter} -> {dst_filter}"),
+                "total_hops": total_hops,
+                "destinations": destinations,
+            }
+        )
+
+    return breakdowns
 
 
 def generate_premium_workflows(
-    profile: Dict[str, object],
-    markers: Sequence[Dict[str, object]],
-    bottlenecks: Sequence[Dict[str, object]],
-) -> List[Dict[str, object]]:
+    profile: Dict[str, Any],
+    markers: Sequence[Dict[str, Any]],
+    bottlenecks: Sequence[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
     """Generate exactly three premium workflow upgrades."""
     unique_style = set(profile.get("unique_style", []))
     top_marker = markers[0]["transition"] if markers else "query -> synthesis"
@@ -679,7 +1056,13 @@ def _load_events(con: duckdb.DuckDBPyConnection) -> List[Dict[str, object]]:
 
     rows = con.execute(
         """
-        SELECT event_id, ts_start, action, app_tool, target
+        SELECT
+            event_id,
+            ts_start,
+            action,
+            app_tool,
+            target,
+            COALESCE(CAST(metadata_json AS VARCHAR), '') AS metadata_text
         FROM events
         WHERE ts_start IS NOT NULL
         ORDER BY ts_start
@@ -693,8 +1076,9 @@ def _load_events(con: duckdb.DuckDBPyConnection) -> List[Dict[str, object]]:
             "action": action,
             "app_tool": app_tool,
             "target": target,
+            "metadata_text": metadata_text,
         }
-        for event_id, ts_start, action, app_tool, target in rows
+        for event_id, ts_start, action, app_tool, target, metadata_text in rows
     ]
 
 
@@ -766,44 +1150,40 @@ def _mock_events() -> List[Dict[str, object]]:
     return events
 
 
-def _coverage(events: Sequence[Dict[str, object]]) -> Dict[str, object]:
-    if not events:
-        return {
-            "event_count": 0,
-            "active_days": 0,
-            "window_start": None,
-            "window_end": None,
-        }
-
+def _extract_coverage_profile(events: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """Calculate date coverage stats."""
     ordered = _sort_events(events)
-    dates = [
-        e.get("ts_start").date()
-        for e in ordered
-        if isinstance(e.get("ts_start"), datetime)
-    ]
+    dates = []
+    for e in ordered:
+        ts = e.get("ts_start")
+        if isinstance(ts, datetime):
+            dates.append(ts.date())
+    days_seen = set(dates)
 
     if not dates:
         return {
-            "event_count": len(events),
+            "event_count": 0,
             "active_days": 0,
-            "window_start": None,
-            "window_end": None,
+            "window_start": "n/a",
+            "window_end": "n/a",
         }
 
     return {
-        "event_count": len(events),
-        "active_days": len(set(dates)),
+        "event_count": int(len(list(events))),
+        "active_days": int(len(list(days_seen))),
         "window_start": min(dates).isoformat(),
         "window_end": max(dates).isoformat(),
     }
 
 
-def render_report(payload: Dict[str, object]) -> str:
+def generate_workflow_dna_report(payload: Dict[str, Any]) -> str:
     now = datetime.now(CST).strftime("%Y-%m-%d %H:%M CST")
     coverage = payload.get("coverage", {})
     profile = payload.get("style_profile", {})
     markers = payload.get("genetic_markers", [])
+    web_breakdowns = payload.get("web_transition_breakdowns", [])
     bottlenecks = payload.get("bottlenecks", [])
+    current_problems = payload.get("current_problems", [])
     premium = payload.get("premium_workflows", [])
 
     lines: List[str] = []
@@ -815,23 +1195,23 @@ def render_report(payload: Dict[str, object]) -> str:
     lines.append("## Coverage")
     lines.append("")
     lines.append(
-        f"- Events analyzed: {coverage.get('event_count', 0)} | Active days: {coverage.get('active_days', 0)}"
+        f"* Events analyzed: {coverage.get('event_count', 0)} | Active days: {coverage.get('active_days', 0)}"
     )
     lines.append(
-        f"- Observation window: {coverage.get('window_start', 'n/a')} -> {coverage.get('window_end', 'n/a')}"
+        f"* Observation window: {coverage.get('window_start', 'n/a')} -> {coverage.get('window_end', 'n/a')}"
     )
     lines.append("")
 
     lines.append("## Unique Style")
     lines.append("")
     for style in profile.get("unique_style", []):
-        lines.append(f"- {style}")
+        lines.append(f"* {style}")
 
     metrics = profile.get("metrics", {})
     if isinstance(metrics, dict) and metrics:
         lines.append("")
         lines.append(
-            "- Key metrics: "
+            "* Key metrics: "
             f"notion_first={metrics.get('notion_first_ratio', 0)}, "
             f"closure={metrics.get('closure_ratio', 0)}, "
             f"query_ladder={metrics.get('query_ladder_ratio', 0)}"
@@ -855,17 +1235,54 @@ def render_report(payload: Dict[str, object]) -> str:
         )
 
     lines.append("")
+    lines.append("## Web Destination Breakdown")
+    lines.append("")
+    if web_breakdowns:
+        lines.append(
+            "Exact destinations behind high-signal transitions that end on web/local_web."
+        )
+        lines.append("")
+        for item in web_breakdowns:
+            lines.append(
+                "### {name} (`{transition}` | {total_hops} hops)".format(
+                    name=item.get("name", "n/a"),
+                    transition=item.get("transition", "n/a"),
+                    total_hops=item.get("total_hops", 0),
+                )
+            )
+            lines.append("")
+            lines.append(
+                "| Destination | Hits | Share | Intent | Next Step | Avg Next Gap (s) | Example Target |"
+            )
+            lines.append("| :--- | ---: | ---: | :--- | :--- | ---: | :--- |")
+            for dest in item.get("destinations", []):
+                lines.append(
+                    "| {destination} | {count} | {share_pct}% | {top_intent} | {top_next_step} | {avg_next_gap_sec} | `{sample_target}` |".format(
+                        destination=dest.get("destination", "unknown"),
+                        count=dest.get("count", 0),
+                        share_pct=round(float(dest.get("share_pct", 0.0)), 1),
+                        top_intent=dest.get("top_intent", "unknown"),
+                        top_next_step=dest.get("top_next_step", "n/a"),
+                        avg_next_gap_sec=round(float(dest.get("avg_next_gap_sec", 0.0)), 1) if isinstance(dest.get("avg_next_gap_sec"), (int, float)) else "n/a",
+                        sample_target=dest.get("sample_target", "n/a"),
+                    )
+                )
+            lines.append("")
+    else:
+        lines.append("* No high-signal transitions into web/local_web found in this window.")
+
+    lines.append("")
     lines.append("## Prompt + Orchestration Profile")
     lines.append("")
-    lines.append(f"- Orchestration signature: `{profile.get('orchestration_signature', 'n/a')}`")
+    lines.append(f"* Orchestration signature: `{profile.get('orchestration_signature', 'n/a')}`")
     fp = profile.get("prompt_fingerprint", {})
     if isinstance(fp, dict):
         lines.append(
-            "- Prompt fingerprint: "
+            "* Prompt fingerprint: "
             f"query_count={fp.get('query_count', 0)}, "
-            f"question_ratio={fp.get('question_ratio', 0)}, "
-            f"evidence_ratio={fp.get('evidence_seeking_ratio', 0)}, "
-            f"systems_ratio={fp.get('systems_language_ratio', 0)}"
+            f"question_ratio={round(float(fp.get('question_ratio', 0.0)), 2)}, "
+            f"evidence_ratio={round(float(fp.get('evidence_seeking_ratio', 0.0)), 2)}, "
+            f"systems_ratio={round(float(fp.get('systems_language_ratio', 0.0)), 2)}"
         )
 
     lines.append("")
@@ -874,21 +1291,65 @@ def render_report(payload: Dict[str, object]) -> str:
     if bottlenecks:
         for item in bottlenecks:
             lines.append(
-                f"- **{item.get('name')}** ({item.get('severity')} | impact {item.get('impact_score')})"
+                f"* **{item.get('name')}** ({item.get('severity')} | impact {item.get('impact_score')})"
             )
-            lines.append(f"  - Evidence: {item.get('evidence')}")
-            lines.append(f"  - Fix: {item.get('recommendation')}")
+            lines.append(f"  * Evidence: {item.get('evidence')}")
+            lines.append(f"  * Fix: {item.get('recommendation')}")
     else:
-        lines.append("- No material bottlenecks detected in current window.")
+        lines.append("* No material bottlenecks detected in current window.")
+
+    lines.append("")
+    lines.append("## Current Problems (Detailed)")
+    lines.append("")
+    if current_problems:
+        lines.append(
+            "Concrete activity context for each active problem: where it happens and what you do next."
+        )
+        lines.append("")
+        for problem in current_problems:
+            lines.append(
+                f"### {problem.get('name')} ({problem.get('severity')} | impact {problem.get('impact_score')})"
+            )
+            lines.append("")
+            lines.append(f"* Evidence: {problem.get('evidence')}")
+            lines.append(f"* Fix: {problem.get('recommendation')}")
+            lines.append(f"* Sampled events: {problem.get('sample_count', 0)}")
+            rows = problem.get("activity_breakdown", [])
+            if rows:
+                lines.append(
+                    "| Destination/Stage | Hits | Share | Intent | Next Step | Avg Next Gap (s) | App Tool | Example Target |"
+                )
+                lines.append("| :--- | ---: | ---: | :--- | :--- | ---: | :--- | :--- |")
+                for row in rows:
+                    lines.append(
+                        "| {destination} | {count} | {share_pct}% | {top_intent} | {top_next_step} | {avg_next_gap_sec} | {top_app_tool} | `{sample_target}` |".format(
+                            destination=row.get("destination", "unknown"),
+                            count=row.get("count", 0),
+                            share_pct=round(float(row.get("share_pct", 0.0)), 1),
+                            top_intent=row.get("top_intent", "unknown"),
+                            top_next_step=row.get("top_next_step", "n/a"),
+                            avg_next_gap_sec=round(float(row.get("avg_next_gap_sec", 0.0)), 1) if isinstance(row.get("avg_next_gap_sec"), (int, float)) else "n/a",
+                            top_app_tool=row.get("top_app_tool", "n/a"),
+                            sample_target=row.get("sample_target", "n/a"),
+                        )
+                    )
+            else:
+                lines.append("* No detailed activity samples available for this problem yet.")
+            lines.append("")
+    else:
+        lines.append("* No current problems detailed for this window.")
 
     lines.append("")
     lines.append("## Premium Workflows")
     lines.append("")
     for workflow in premium:
-        lines.append(f"### {workflow.get('name')}")
-        lines.append(f"- Trigger: {workflow.get('trigger')}")
-        lines.append(f"- Base marker: `{workflow.get('base_marker')}`")
-        lines.append(f"- KPI: {workflow.get('kpi')}")
+        lines.append(f"### {workflow.get('name', 'Premium Workflow')}")
+        lines.append("")
+        lines.append(f"* **Process**: {workflow.get('process', 'n/a')}")
+        lines.append(f"* **Why it fits**: {workflow.get('fit', 'n/a')}")
+        lines.append(f"* Trigger: {workflow.get('trigger')}")
+        lines.append(f"* Base marker: `{workflow.get('base_marker')}`")
+        lines.append(f"* KPI: {workflow.get('kpi')}")
         steps = workflow.get("steps", [])
         if isinstance(steps, list):
             for idx, step in enumerate(steps, start=1):
@@ -973,7 +1434,7 @@ def run(
     con: Optional[duckdb.DuckDBPyConnection] = None,
     mock: bool = False,
     output_dir: Optional[Path] = None,
-) -> Dict[str, object]:
+) -> Dict[str, Any]:
     """Run the Workflow DNA extraction pipeline."""
     output_root = output_dir or OUTPUT_DIR
     output_root.mkdir(parents=True, exist_ok=True)
@@ -993,34 +1454,37 @@ def run(
             events = _load_events(live_con)
 
         markers = extract_genetic_markers(events)
+        web_breakdowns = extract_web_transition_breakdowns(events, markers)
         style_profile = profile_creation_style(events, markers)
         bottlenecks = detect_bottlenecks(events)
+        current_problems = build_current_problem_breakdowns(events, bottlenecks)
         premium = generate_premium_workflows(style_profile, markers, bottlenecks)
 
-        payload: Dict[str, object] = {
-            "coverage": _coverage(events),
+        dna_payload: Dict[str, Any] = {
+            "coverage": _extract_coverage_profile(events),
             "genetic_markers": markers,
+            "web_transition_breakdowns": web_breakdowns,
             "style_profile": style_profile,
             "bottlenecks": bottlenecks,
+            "current_problems": current_problems,
             "premium_workflows": premium,
         }
 
-        report_text = render_report(payload)
+        report_text = generate_workflow_dna_report(dna_payload)
         report_path = output_root / "WORKFLOW_DNA_REPORT.md"
         report_path.write_text(report_text, encoding="utf-8")
 
         today = datetime.now(CST).strftime("%Y-%m-%d")
         json_path = output_root / f"workflow_dna_{today}.json"
-        json_path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
-        payload["report_path"] = str(report_path)
-        payload["json_path"] = str(json_path)
+        dna_payload["report_path"] = str(report_path)
+        dna_payload["json_path"] = str(json_path)
 
         if live_con is not None and not mock:
             _init_schema(live_con)
-            _persist_payload(live_con, payload)
+            _persist_payload(live_con, dna_payload)
 
-        return payload
+        return dna_payload
     finally:
         if owns_connection and live_con is not None:
             live_con.close()
@@ -1033,18 +1497,62 @@ def main() -> None:
     parser.add_argument("--json", action="store_true", help="Print JSON payload")
     args = parser.parse_args()
 
-    payload = run(args.db, mock=args.mock)
+    # Establish connection for the entire main execution
+    con = duckdb.connect(str(args.db))
+
+    payload = run(args.db, con=con, mock=args.mock)
+
+    # Export to orchestrator
+    export_signals_to_orchestrator(con, payload.get("bottlenecks", []), payload.get("style_profile", {}))
 
     if args.json:
         print(json.dumps(payload, indent=2, default=str))
-        return
+    else:
+        print("WORKFLOW DNA COMPLETE")
+        print(f"Report: {payload.get('report_path')}")
+        print(f"JSON:   {payload.get('json_path')}")
+        print("Unique Style:")
+        for item in payload.get("style_profile", {}).get("unique_style", []):
+            print(f"  - {item}")
+    print("\n✅ Workflow DNA analysis complete")
+    con.close()
 
-    print("WORKFLOW DNA COMPLETE")
-    print(f"Report: {payload.get('report_path')}")
-    print(f"JSON:   {payload.get('json_path')}")
-    print("Unique Style:")
-    for item in payload.get("style_profile", {}).get("unique_style", []):
-        print(f"  - {item}")
+
+def export_signals_to_orchestrator(
+    con: duckdb.DuckDBPyConnection,
+    bottlenecks: List[Dict[str, Any]],
+    profile: Dict[str, Any],
+) -> None:
+    """Export critical behavioral signals to the orchestrator."""
+    from orchestrator import Orchestrator, Signal, ActionItem
+    
+    orch = Orchestrator()
+
+    for b in bottlenecks:
+        if b.get("severity") in ["high", "critical"] or float(b.get("impact_score", 0)) > 500:
+            sig = Signal(
+                type="behavioral",
+                severity=b.get("severity", "medium"),
+                source="DNAEngine",
+                description=f"Bottleneck: {b['name']}",
+                metadata={
+                    "impact_score": b.get("impact_score"),
+                    "evidence": b.get("evidence"),
+                    "recommendation": b.get("recommendation"),
+                    "profile_style": profile.get("unique_style")
+                }
+            )
+            sid = orch.register_signal(sig)
+            if sid:
+                action = ActionItem(
+                    title=f"Mitigate {b['name']}",
+                    description=f"High-impact bottleneck detected: {b['evidence']}. Recommendation: {b['recommendation']}",
+                    category="intervention",
+                    signal_id=sid,
+                    priority=9 if b.get("severity") == "critical" else 6
+                )
+                orch.add_to_queue(action)
+                print(f"  📤 Exported behavioral signal to orchestrator: {b['name']}")
 
 
 if __name__ == "__main__":

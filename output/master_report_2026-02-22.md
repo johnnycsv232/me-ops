@@ -1,6 +1,6 @@
 # ME-OPS ARCHITECT REPORT
 
-*Generated: 2026-02-21 18:50 CST*
+*Generated: 2026-02-22 05:41 CST*
 
 ---
 
@@ -167,4 +167,4 @@
 * Current problems:
   * Missing Site Attribution (medium, impact 55.6)
   * Query Attribution Blind Spot (high, impact 92.7)
-* Full report: `/home/finan/dev/labs/me_ops/output/action_site_insights_2026-02-20.md`
+* Full report: `/home/finan/dev/labs/me_ops/output/action_site_insights_2026-02-22.md`

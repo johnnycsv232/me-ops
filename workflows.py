@@ -271,7 +271,7 @@ def run(
         print(f"    Sessions: {rows[0]}, Avg: {rows[1]}min, "
               f"Avg events: {rows[2]}, Longest: {rows[3]}min")
 
-        print(f"\n  TOP 10 WORKFLOW PATTERNS:")
+        print("\n  TOP 10 WORKFLOW PATTERNS:")
         rows = con.execute("""
             SELECT sequence, frequency FROM workflow_patterns
             ORDER BY frequency DESC LIMIT 10
@@ -279,7 +279,7 @@ def run(
         for r in rows:
             print(f"    [{r[1]:>4}x] {r[0]}")
 
-        print(f"\n  STRONGEST TRANSITIONS:")
+        print("\n  STRONGEST TRANSITIONS:")
         rows = con.execute("""
             SELECT from_action, to_action, weight, avg_gap_sec
             FROM workflow_edges ORDER BY weight DESC LIMIT 10
@@ -289,7 +289,7 @@ def run(
 
         # Action centrality
         if nodes:
-            print(f"\n  GRAPH CENTRALITY (most pivotal actions):")
+            print("\n  GRAPH CENTRALITY (most pivotal actions):")
             centrality = compute_action_centrality(edge_rows)
             top = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:8]
             for action, score in top:

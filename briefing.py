@@ -25,6 +25,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import duckdb
+from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -271,8 +273,53 @@ def format_data_briefing(data: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+def run(
+    db_path: Path,
+    *,
+    con: Optional[duckdb.DuckDBPyConnection] = None,
+    target_date: Optional[str] = None,
+    no_ai: bool = False,
+    save: bool = True,
+) -> dict:
+    """Run briefing pipeline supporting shared connection."""
+    close_con = False
+    if con is None:
+        con = duckdb.connect(str(db_path), read_only=True)
+        close_con = True
+
+    if target_date is None:
+        target_date = datetime.now(CST).strftime("%Y-%m-%d")
+
+    try:
+        data = collect_briefing_data(con, target_date)
+    finally:
+        if close_con:
+            con.close()
+
+    # Data-only briefing (always generated)
+    data_briefing = format_data_briefing(data)
+
+    # AI-enhanced briefing (optional)
+    ai_briefing = None
+    if not no_ai:
+        print("  Generating AI briefing...")
+        ai_briefing = generate_ai_briefing(data)
+
+    # Combine
+    if ai_briefing:
+        final = ai_briefing + "\n\n---\n\n" + data_briefing
+    else:
+        final = data_briefing
+
+    # Save
+    out_file = None
+    if save:
+        OUTPUT_DIR.mkdir(exist_ok=True)
+        out_file = OUTPUT_DIR / f"briefing_{target_date}.md"
+        out_file.write_text(final, encoding="utf-8")
+
+    return {"report": final, "path": out_file, "data": data}
+
 
 def main() -> None:
     import argparse
@@ -291,34 +338,12 @@ def main() -> None:
     print(f"ME-OPS Morning Briefing — {target_date}")
     print("=" * 60)
 
-    con = duckdb.connect(str(DB_PATH), read_only=True)
-    data = collect_briefing_data(con, target_date)
-    con.close()
+    result = run(DB_PATH, target_date=target_date, no_ai=args.no_ai, save=args.save)
+    print(result["report"])
 
-    # Data-only briefing (always generated)
-    data_briefing = format_data_briefing(data)
-
-    # AI-enhanced briefing (optional)
-    ai_briefing = None
-    if not args.no_ai:
-        print("  Generating AI briefing...")
-        ai_briefing = generate_ai_briefing(data)
-
-    # Combine
-    if ai_briefing:
-        final = ai_briefing + "\n\n---\n\n" + data_briefing
-    else:
-        final = data_briefing
-
-    print(final)
-
-    # Save
-    if args.save:
-        OUTPUT_DIR.mkdir(exist_ok=True)
-        out_file = OUTPUT_DIR / f"briefing_{target_date}.md"
-        out_file.write_text(final, encoding="utf-8")
+    if result["path"]:
         print(f"\n{'=' * 60}")
-        print(f"✅ Briefing saved to: {out_file}")
+        print(f"✅ Briefing saved to: {result['path']}")
 
 
 if __name__ == "__main__":

@@ -18,12 +18,11 @@ Usage:
 """
 from __future__ import annotations
 
-import json
-import sys
 from pathlib import Path
 
 import duckdb
 import numpy as np
+from typing import Optional
 
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 
@@ -64,7 +63,6 @@ def extract_session_features(con: duckdb.DuckDBPyConnection) -> tuple[np.ndarray
     if df.empty:
         return np.array([]), []
 
-    import pandas as pd  # noqa: E402 — lazy import
 
     # Cyclical encoding for time features
     df["hour_sin"] = np.sin(2 * np.pi * df["hour_of_day"] / 24)
@@ -271,36 +269,51 @@ def print_report(
 # Main
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+def run(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnection] = None) -> None:
+    """Run full clustering pipeline."""
     print("ME-OPS Behavioral Clustering")
     print("=" * 60)
 
-    con = duckdb.connect(str(DB_PATH))
+    close_con = False
+    if con is None:
+        con = duckdb.connect(str(db_path))
+        close_con = True
 
-    print("  Extracting session features...")
-    X, session_ids = extract_session_features(con)
+    try:
+        print("  Extracting session features...")
+        X, session_ids = extract_session_features(con)
 
-    if len(X) == 0:
-        print("  ERROR: No sessions found.")
-        con.close()
-        return
+        if len(X) == 0:
+            print("  ERROR: No sessions found.")
+            return
 
-    print(f"  {len(session_ids)} sessions, {X.shape[1]} features")
+        print(f"  {len(session_ids)} sessions, {X.shape[1]} features")
 
-    # Adjust min_cluster_size based on dataset size
-    min_cluster_size = max(3, len(session_ids) // 20)
-    print(f"  Min cluster size: {min_cluster_size}")
+        # Adjust min_cluster_size based on dataset size
+        min_cluster_size = max(3, len(session_ids) // 20)
+        print(f"  Min cluster size: {min_cluster_size}")
 
-    print("  Running UMAP + HDBSCAN...")
-    embedding, labels, cluster_names = cluster_sessions(
-        X, session_ids, min_cluster_size=min_cluster_size
-    )
+        print("  Running UMAP + HDBSCAN...")
+        embedding, labels, cluster_names = cluster_sessions(
+            X, session_ids, min_cluster_size=min_cluster_size
+        )
 
-    save_clusters(con, session_ids, labels, cluster_names)
-    print_report(X, session_ids, labels, cluster_names)
-
-    con.close()
+        save_clusters(con, session_ids, labels, cluster_names)
+        print_report(X, session_ids, labels, cluster_names)
+    finally:
+        if close_con:
+            con.close()
+    
     print("\n✅ Clustering complete")
+
+
+def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="ME-OPS Behavioral Clustering")
+    parser.add_argument("--db", type=str, default=str(DB_PATH), help="Path to DuckDB")
+    args = parser.parse_args()
+
+    run(Path(args.db))
 
 
 if __name__ == "__main__":

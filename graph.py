@@ -17,6 +17,7 @@ from __future__ import annotations
 import sys
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 import duckdb
 
@@ -281,11 +282,15 @@ def interactive_mode(con: duckdb.DuckDBPyConnection) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
-def main() -> None:
+def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
+    """Build and report on knowledge graph."""
     print("ME-OPS Knowledge Graph")
     print("=" * 60)
 
-    con = duckdb.connect(str(DB_PATH))
+    local_con = False
+    if con is None:
+        con = duckdb.connect(str(db_path))
+        local_con = True
 
     print("  Building graph edges...")
     build_graph(con)
@@ -320,6 +325,22 @@ def main() -> None:
     print()
     print("=" * 60)
     print("✅ Knowledge graph complete")
+
+    if local_con:
+        con.close()
+    return True
+
+
+def main() -> None:
+    db_path = DB_PATH
+    if "--db" in sys.argv:
+        try:
+            db_path = Path(sys.argv[sys.argv.index("--db") + 1])
+        except (IndexError, ValueError):
+            pass
+
+    con = duckdb.connect(str(db_path))
+    run(db_path, con=con)
 
     if "--query" in sys.argv:
         interactive_mode(con)

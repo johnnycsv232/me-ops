@@ -22,7 +22,6 @@ Usage:
 from __future__ import annotations
 
 import signal
-import sys
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path

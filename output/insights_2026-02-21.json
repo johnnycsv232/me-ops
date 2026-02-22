@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-22T00:50:38.295287+00:00",
+  "generated_at": "2026-02-22T01:47:34.338333+00:00",
   "memory_mode": "persistent",
   "coverage": {
     "events_count": 28013,
@@ -8,8 +8,8 @@
   },
   "summary": {
     "insight_count": 12,
-    "new_count": 0,
-    "recurring_count": 12,
+    "new_count": 12,
+    "recurring_count": 0,
     "high_impact_count": 5
   },
   "insights": [
@@ -33,8 +33,8 @@
       "confidence": 0.8,
       "evidence_key": "IronClad::Content",
       "insight_key": "056d0621b80a74e580529f0f112b0c903ae478ec",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "signal_drift",
@@ -56,8 +56,8 @@
       "confidence": 0.8,
       "evidence_key": "AI Arbitrage::Integration",
       "insight_key": "c1974fbda83d1d64d0264924aa121bc208f32022",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "signal_drift",
@@ -79,8 +79,8 @@
       "confidence": 0.8,
       "evidence_key": "GettUpp::Marketing",
       "insight_key": "b92b3aab19b45175bf0e2d147d191ab358765d0b",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "signal_drift",
@@ -102,8 +102,8 @@
       "confidence": 0.74,
       "evidence_key": "Cristina/KB-DS::Pattern",
       "insight_key": "868357d6609b63605f8a050ec979c280babf02c3",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -207,8 +207,8 @@
       "confidence": 0.9,
       "evidence_key": "GettUpp::Infrastructure|Miscellaneous::General",
       "insight_key": "60b40bd9aee26d848c512e1d644177b4b7cf9453",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -312,8 +312,8 @@
       "confidence": 0.92,
       "evidence_key": "AI Arbitrage::Automation|Cristina/KB-DS::Truth",
       "insight_key": "a56750d291712701e9ddaccca6ddb514c1dee723",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -417,8 +417,8 @@
       "confidence": 0.89,
       "evidence_key": "AI Arbitrage::Integration|Cristina/KB-DS::Memory",
       "insight_key": "d61698252cab0904e6db2612c940ad5128da78e2",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -522,8 +522,8 @@
       "confidence": 0.89,
       "evidence_key": "Cristina/KB-DS::Memory|Cristina/KB-DS::Truth",
       "insight_key": "3d50e4466c8ed65951942ae6d04dba94b33e7d86",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -627,8 +627,8 @@
       "confidence": 0.91,
       "evidence_key": "AI Arbitrage::Integration|Cristina/KB-DS::Truth",
       "insight_key": "4430c368408d361bfbfcce57f92127ded191dcb4",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -732,8 +732,8 @@
       "confidence": 0.95,
       "evidence_key": "GettUpp::Infrastructure|GettUpp::UI/UX",
       "insight_key": "dfd4d0b7ae7a2479b9c92b54db24878b520adfb5",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -837,8 +837,8 @@
       "confidence": 0.95,
       "evidence_key": "Cristina/KB-DS::Truth|GettUpp::Product",
       "insight_key": "1491a96e8199b930b5add67b0aa644b26a21b36b",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     },
     {
       "type": "connection",
@@ -942,8 +942,8 @@
       "confidence": 0.91,
       "evidence_key": "Cristina/KB-DS::Truth|IronClad::Sales",
       "insight_key": "13a43ea29aed3845feafaf5428d80dd66411b8e6",
-      "novelty": "recurring",
-      "previous_occurrences": 4
+      "novelty": "new",
+      "previous_occurrences": 0
     }
   ],
   "action_queue": [
@@ -953,7 +953,7 @@
       "source_title": "Signal drift detected: IronClad::Content",
       "impact_score": 8.0,
       "confidence": 0.8,
-      "novelty": "recurring"
+      "novelty": "new"
     },
     {
       "priority": 2,
@@ -961,7 +961,7 @@
       "source_title": "Signal drift detected: AI Arbitrage::Integration",
       "impact_score": 8.0,
       "confidence": 0.8,
-      "novelty": "recurring"
+      "novelty": "new"
     },
     {
       "priority": 3,
@@ -969,7 +969,7 @@
       "source_title": "Signal drift detected: GettUpp::Marketing",
       "impact_score": 8.0,
       "confidence": 0.8,
-      "novelty": "recurring"
+      "novelty": "new"
     },
     {
       "priority": 4,
@@ -977,7 +977,7 @@
       "source_title": "Signal drift detected: Cristina/KB-DS::Pattern",
       "impact_score": 3.5,
       "confidence": 0.74,
-      "novelty": "recurring"
+      "novelty": "new"
     },
     {
       "priority": 5,
@@ -985,7 +985,7 @@
       "source_title": "GettUpp::Infrastructure + Miscellaneous::General: uplift +2.58",
       "impact_score": 2.2,
       "confidence": 0.9,
-      "novelty": "recurring"
+      "novelty": "new"
     },
     {
       "priority": 6,
@@ -993,7 +993,7 @@
       "source_title": "AI Arbitrage::Automation + Cristina/KB-DS::Truth: uplift +1.06",
       "impact_score": 1.83,
       "confidence": 0.92,
-      "novelty": "recurring"
+      "novelty": "new"
     },
     {
       "priority": 7,
@@ -1001,7 +1001,7 @@
       "source_title": "AI Arbitrage::Integration + Cristina/KB-DS::Memory: uplift +1.11",
       "impact_score": 1.78,
       "confidence": 0.89,
-      "novelty": "recurring"
+      "novelty": "new"
     }
   ]
 }

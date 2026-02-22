@@ -151,7 +151,7 @@ def cluster_sessions(
     # Generate cluster names based on centroid features
     cluster_names = _name_clusters(X, labels)
 
-    return embedding, labels, cluster_names
+    return np.asarray(embedding), np.asarray(labels), cluster_names
 
 
 def _name_clusters(X: np.ndarray, labels: np.ndarray) -> list[str]:

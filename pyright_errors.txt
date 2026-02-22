@@ -1,0 +1,94 @@
+/home/finan/dev/labs/me_ops/action_site_insights.py
+  /home/finan/dev/labs/me_ops/action_site_insights.py:215:40 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:216:41 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:217:48 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:224:26 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:225:28 - error: Argument of type "object" cannot be assigned to parameter "counter" of type "Dict[Tuple[str, str], int]" in function "_top_pairs"
+    "object" is not assignable to "Dict[Tuple[str, str], int]" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:235:24 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:236:30 - error: Argument of type "object" cannot be assigned to parameter "counter" of type "Dict[Tuple[str, str], int]" in function "_top_pairs"
+    "object" is not assignable to "Dict[Tuple[str, str], int]" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:240:51 - error: Cannot access attribute "get" for class "object"
+    Attribute "get" is unknown (reportAttributeAccessIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:265:26 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:268:44 - error: Argument of type "object" cannot be assigned to parameter "counter" of type "Dict[Tuple[str, str], int]" in function "_top_pairs"
+    "object" is not assignable to "Dict[Tuple[str, str], int]" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:275:24 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/action_site_insights.py:278:48 - error: Argument of type "object" cannot be assigned to parameter "counter" of type "Dict[Tuple[str, str], int]" in function "_top_pairs"
+    "object" is not assignable to "Dict[Tuple[str, str], int]" (reportArgumentType)
+/home/finan/dev/labs/me_ops/agent.py
+  /home/finan/dev/labs/me_ops/agent.py:124:36 - error: Argument of type "str | None" cannot be assigned to parameter "s" of type "str | bytes | bytearray" in function "loads"
+    Type "str | None" is not assignable to type "str | bytes | bytearray"
+      Type "None" is not assignable to type "str | bytes | bytearray"
+        "None" is not assignable to "str"
+        "None" is not assignable to "bytes"
+        "None" is not assignable to "bytearray" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/agent.py:127:16 - error: Type "str | None" is not assignable to return type "str"
+    Type "str | None" is not assignable to type "str"
+      "None" is not assignable to "str" (reportReturnType)
+  /home/finan/dev/labs/me_ops/agent.py:191:30 - error: Argument of type "str | None" cannot be assigned to parameter "s" of type "str | bytes | bytearray" in function "loads"
+    Type "str | None" is not assignable to type "str | bytes | bytearray"
+      Type "None" is not assignable to type "str | bytes | bytearray"
+        "None" is not assignable to "str"
+        "None" is not assignable to "bytes"
+        "None" is not assignable to "bytearray" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/agent.py:219:44 - error: Argument of type "str | None" cannot be assigned to parameter "s" of type "str | bytes | bytearray" in function "loads"
+    Type "str | None" is not assignable to type "str | bytes | bytearray"
+      Type "None" is not assignable to type "str | bytes | bytearray"
+        "None" is not assignable to "str"
+        "None" is not assignable to "bytes"
+        "None" is not assignable to "bytearray" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/agent.py:220:47 - error: Argument of type "str | None" cannot be assigned to parameter "s" of type "str | bytes | bytearray" in function "loads"
+    Type "str | None" is not assignable to type "str | bytes | bytearray"
+      Type "None" is not assignable to type "str | bytes | bytearray"
+        "None" is not assignable to "str"
+        "None" is not assignable to "bytes"
+        "None" is not assignable to "bytearray" (reportArgumentType)
+  /home/finan/dev/labs/me_ops/agent.py:241:16 - error: Type "str | None" is not assignable to return type "str"
+    Type "str | None" is not assignable to type "str"
+      "None" is not assignable to "str" (reportReturnType)
+  /home/finan/dev/labs/me_ops/agent.py:267:16 - error: Type "str | None" is not assignable to return type "str"
+    Type "str | None" is not assignable to type "str"
+      "None" is not assignable to "str" (reportReturnType)
+  /home/finan/dev/labs/me_ops/agent.py:290:16 - error: Type "str | None" is not assignable to return type "str"
+    Type "str | None" is not assignable to type "str"
+      "None" is not assignable to "str" (reportReturnType)
+  /home/finan/dev/labs/me_ops/agent.py:408:26 - error: "name" is not a known attribute of "None" (reportOptionalMemberAccess)
+  /home/finan/dev/labs/me_ops/agent.py:409:31 - error: "args" is not a known attribute of "None" (reportOptionalMemberAccess)
+  /home/finan/dev/labs/me_ops/agent.py:409:43 - error: "args" is not a known attribute of "None" (reportOptionalMemberAccess)
+  /home/finan/dev/labs/me_ops/agent.py:424:26 - error: Argument of type "str | None" cannot be assigned to parameter "name" of type "str" in function "from_function_response"
+    Type "str | None" is not assignable to type "str"
+      "None" is not assignable to "str" (reportArgumentType)
+/home/finan/dev/labs/me_ops/architect.py
+  /home/finan/dev/labs/me_ops/architect.py:414:15 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:436:18 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:450:18 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:473:12 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:490:18 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:494:21 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:512:16 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/architect.py:541:18 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+/home/finan/dev/labs/me_ops/briefing.py
+  /home/finan/dev/labs/me_ops/briefing.py:64:19 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/briefing.py:64:38 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/briefing.py:65:25 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/briefing.py:65:48 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/briefing.py:70:16 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+/home/finan/dev/labs/me_ops/daily_report.py
+  /home/finan/dev/labs/me_ops/daily_report.py:107:24 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/daily_report.py:130:24 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/daily_report.py:149:24 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+/home/finan/dev/labs/me_ops/sources/github.py
+  /home/finan/dev/labs/me_ops/sources/github.py:86:23 - error: Type "None" is not assignable to declared type "str"
+    "None" is not assignable to "str" (reportAssignmentType)
+/home/finan/dev/labs/me_ops/tests/test_action_site_insights.py
+  /home/finan/dev/labs/me_ops/tests/test_action_site_insights.py:72:12 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/tests/test_action_site_insights.py:73:12 - error: "__getitem__" method not defined on type "object" (reportIndexIssue)
+  /home/finan/dev/labs/me_ops/tests/test_action_site_insights.py:74:34 - error: "object" is not iterable
+    "__iter__" method not defined (reportGeneralTypeIssues)
+/home/finan/dev/labs/me_ops/tests/test_performance_refactors.py
+  /home/finan/dev/labs/me_ops/tests/test_performance_refactors.py:21:31 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/tests/test_performance_refactors.py:88:36 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/tests/test_performance_refactors.py:89:34 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+  /home/finan/dev/labs/me_ops/tests/test_performance_refactors.py:135:34 - error: Object of type "None" is not subscriptable (reportOptionalSubscript)
+48 errors, 0 warnings, 0 informations

@@ -18,14 +18,19 @@ def export_dashboard_data(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnect
         close_con = True
     
     try:
+        def fetch_as_dicts(connection, query):
+            res = connection.execute(query)
+            cols = [desc[0] for desc in res.description]
+            return [dict(zip(cols, row)) for row in res.fetchall()]
+
         data = {
             "metadata": {
                 "generated_at": datetime.now().isoformat(),
                 "user": "Johnny Cage",
                 "system": "ME-OPS v1.0"
             },
-            "scores": con.execute("SELECT * FROM daily_scores ORDER BY date DESC LIMIT 14").fetchdf().to_dict(orient="records"),
-            "workflows": con.execute("SELECT * FROM discovered_workflows").fetchdf().to_dict(orient="records"),
+            "scores": fetch_as_dicts(con, "SELECT * FROM daily_scores ORDER BY date DESC LIMIT 14"),
+            "workflows": fetch_as_dicts(con, "SELECT * FROM discovered_workflows"),
             "insights": get_insight_prompts()
         }
         
@@ -36,6 +41,9 @@ def export_dashboard_data(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnect
         
         print(f"Dashboard data exported to {output_path}")
         return str(output_path)
+    except Exception as e:
+        print(f"Error exporting dashboard data: {e}")
+        return ""
     finally:
         if close_con:
             con.close()

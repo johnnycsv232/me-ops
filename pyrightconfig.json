@@ -3,7 +3,12 @@
   "pythonPlatform": "Linux",
   "venvPath": ".",
   "venv": ".venv",
-  "include": ["."],
+  "extraPaths": [
+    "."
+  ],
+  "include": [
+    "."
+  ],
   "exclude": [
     ".venv",
     "__pycache__",

@@ -1366,7 +1366,7 @@ def _init_schema(con: duckdb.DuckDBPyConnection) -> None:
             con.execute(stmt)
 
 
-def _persist_payload(con: duckdb.DuckDBPyConnection, payload: Dict[str, object]) -> None:
+def _persist_payload(con: duckdb.DuckDBPyConnection, payload: Dict[str, Any]) -> None:
     snapshot_date = datetime.now(CST).date().isoformat()
     markers = payload.get("genetic_markers", [])
     profile = payload.get("style_profile", {})

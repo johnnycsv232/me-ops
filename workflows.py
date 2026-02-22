@@ -268,8 +268,9 @@ def run(
                    MAX(duration_min) AS longest_min
             FROM sessions
         """).fetchone()
-        print(f"    Sessions: {rows[0]}, Avg: {rows[1]}min, "
-              f"Avg events: {rows[2]}, Longest: {rows[3]}min")
+        if rows is not None:
+            print(f"    Sessions: {rows[0]}, Avg: {rows[1]}min, "
+                  f"Avg events: {rows[2]}, Longest: {rows[3]}min")
 
         print("\n  TOP 10 WORKFLOW PATTERNS:")
         rows = con.execute("""

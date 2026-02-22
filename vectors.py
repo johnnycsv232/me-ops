@@ -174,19 +174,20 @@ def index_events(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnection] = No
                 payload={
                     "event_id": row[0],
                     "action": row[1],
-                    "target": str(row[2])[:200] if row[2] else None,
+                    "target": str(row[2]) if row[2] else None,
                     "app_tool": row[3],
                     "source_file": row[4],
                     "timestamp": row[5],
-                    "text": texts[i][:300],
+                    "text": str(texts[i]),
                 },
             ))
 
         # Batch upsert
         for i in range(0, len(points), 500):
+            batch = points[i] # type: ignore
             client.upsert(
                 collection_name=COLLECTION,
-                points=points[i : i + 500],
+                points=points[i : i + 500], # type: ignore
             )
 
         count = client.get_collection(COLLECTION).points_count
@@ -194,6 +195,9 @@ def index_events(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnection] = No
         print(f"\n{'='*60}")
         print("✅ Vector index built")
         return True
+    except Exception as e:
+        print(f"❌ Error indexing vectors: {e}")
+        return False
     finally:
         if close_con:
             con.close()

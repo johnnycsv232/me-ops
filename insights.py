@@ -88,8 +88,9 @@ def _coverage_snapshot(con: duckdb.DuckDBPyConnection) -> Dict[str, int]:
             WHERE ts_start IS NOT NULL
             """
         ).fetchone()
-        events_count = int(row[0] or 0)
-        active_days = int(row[1] or 0)
+        if row:
+            events_count = int(row[0] or 0)
+            active_days = int(row[1] or 0)
     if _table_exists(con, "event_subcategories"):
         row = con.execute(
             """
@@ -97,7 +98,8 @@ def _coverage_snapshot(con: duckdb.DuckDBPyConnection) -> Dict[str, int]:
             FROM event_subcategories
             """
         ).fetchone()
-        signal_count = int(row[0] or 0)
+        if row:
+            signal_count = int(row[0] or 0)
     return {
         "events_count": events_count,
         "active_days": active_days,

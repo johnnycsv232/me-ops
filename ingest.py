@@ -803,7 +803,8 @@ def run(data_dir: Path, db_path: Path):
     # Mine projects
     print("\nMining project references...")
     mine_projects(con)
-    proj_count = con.execute("SELECT COUNT(*) FROM projects WHERE first_seen IS NOT NULL").fetchone()[0]
+    proj_count_row = con.execute("SELECT COUNT(*) FROM projects WHERE first_seen IS NOT NULL").fetchone()
+    proj_count = proj_count_row[0] if proj_count_row else 0
     print(f"  Projects with evidence: {proj_count}")
 
     # Link events to tools from activities
@@ -815,7 +816,8 @@ def run(data_dir: Path, db_path: Path):
         JOIN tools t ON e.app_tool = t.name
         WHERE e.app_tool IS NOT NULL
     """)
-    tool_links = con.execute("SELECT COUNT(*) FROM event_tools").fetchone()[0]
+    tool_links_row = con.execute("SELECT COUNT(*) FROM event_tools").fetchone()
+    tool_links = tool_links_row[0] if tool_links_row else 0
     print(f"  Event-tool links: {tool_links}")
 
     # Mine subcategories
@@ -827,7 +829,8 @@ def run(data_dir: Path, db_path: Path):
     for table in ["raw_sources", "events", "people", "tools", "models",
                    "projects", "files", "event_tools", "event_files",
                    "event_projects", "event_tags", "event_subcategories"]:
-        count = con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        count_row = con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
+        count = count_row[0] if count_row else 0
         print(f"  {table:<20} {count:>8}")
 
     con.close()

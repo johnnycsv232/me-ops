@@ -94,7 +94,8 @@ def build_graph(con: duckdb.DuckDBPyConnection) -> None:
         FROM workflow_edges we
     """)
 
-    total = con.execute("SELECT COUNT(*) FROM graph_edges").fetchone()[0]
+    total_row = con.execute("SELECT COUNT(*) FROM graph_edges").fetchone()
+    total = total_row[0] if total_row else 0
     node_types = con.execute("""
         SELECT src_type, COUNT(DISTINCT src_id) FROM graph_edges GROUP BY src_type
         UNION ALL

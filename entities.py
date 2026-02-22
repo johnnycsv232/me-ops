@@ -110,7 +110,8 @@ def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         FROM people
     """)
 
-    count = con.execute("SELECT COUNT(*) FROM entity_summary").fetchone()[0]
+    count_row = con.execute("SELECT COUNT(*) FROM entity_summary").fetchone()
+    count = count_row[0] if count_row else 0
     print(f"    → {count} entities indexed")
 
     # 2. Tool-project co-occurrence
@@ -126,7 +127,8 @@ def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         JOIN projects p ON ep.project_id = p.project_id
         GROUP BY t.name, p.name
     """)
-    count = con.execute("SELECT COUNT(*) FROM tool_project_matrix").fetchone()[0]
+    count_row = con.execute("SELECT COUNT(*) FROM tool_project_matrix").fetchone()
+    count = count_row[0] if count_row else 0
     print(f"    → {count} tool-project pairs")
 
     # 3. File extension stats
@@ -142,7 +144,8 @@ def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         LEFT JOIN event_files ef ON f.file_id = ef.file_id
         GROUP BY f.extension
     """)
-    count = con.execute("SELECT COUNT(*) FROM file_extension_stats").fetchone()[0]
+    count_row = con.execute("SELECT COUNT(*) FROM file_extension_stats").fetchone()
+    count = count_row[0] if count_row else 0
     print(f"    → {count} file extensions tracked")
 
     # 4. Tag stats
@@ -156,7 +159,8 @@ def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         WHERE et.tag_text != ''
         GROUP BY et.tag_text
     """)
-    count = con.execute("SELECT COUNT(*) FROM tag_stats").fetchone()[0]
+    count_row = con.execute("SELECT COUNT(*) FROM tag_stats").fetchone()
+    count = count_row[0] if count_row else 0
     print(f"    → {count} tags analyzed")
 
     # Print top entities

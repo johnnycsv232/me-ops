@@ -30,7 +30,7 @@ from taxonomy import categorize_event
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-DATA_DIR = Path(__file__).resolve().parent.parent  # /dev/labs/ where pieces_*.json live
+DATA_DIR = Path(__file__).resolve().parent / "data"
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 
 SOURCE_FILES = [

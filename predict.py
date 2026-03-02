@@ -4,7 +4,7 @@
 Trains models on session features to predict:
 1. Will I context-thrash today? (classification)
 2. How long will my next session be? (regression)
-3. What project will I focus on? (multi-class)
+3. (Planned) project focus prediction (multi-class)
 
 Skills used: ai-engineer (ML pipeline),
              testing-patterns (train/test split, cross-validation)
@@ -123,7 +123,9 @@ def train_and_evaluate(data: dict) -> dict:
 
     # Time-series cross-validation (prevents data leakage)
     # Ref: https://scikit-learn.org/stable/modules/cross_validation.html#time-series-split
-    tscv = TimeSeriesSplit(n_splits=min(5, len(X) // 10))
+    max_splits = len(X) // 10
+    n_splits = max(2, min(5, max_splits))
+    tscv = TimeSeriesSplit(n_splits=n_splits)
 
     # F1 scorer that handles folds with no positive class
     # Ref: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html

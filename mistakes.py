@@ -235,7 +235,7 @@ def build_anti_playbook(con: duckdb.DuckDBPyConnection) -> int:
         rules.append((
             rid,
             "Do NOT switch projects more than 3x per session. "
-            "Each switch costs ~23 minutes of re-focus.",
+            "Task switching often carries substantial resumption overhead; treat it as a risk multiplier, not a fixed constant.",
             "project_switch > 3/session",
             f"{thrash_count} rapid switches detected",
             0.85
@@ -251,8 +251,8 @@ def build_anti_playbook(con: duckdb.DuckDBPyConnection) -> int:
     if late > 10:
         rules.append((
             rid,
-            "STOP working after 11 PM. Late-night code has 2-3x "
-            "higher defect density. Sleep > shipping.",
+            "STOP working after 11 PM. Late-night work often increases error risk; "
+            "validate against your own outcomes. Sleep > shipping.",
             "hour >= 23 OR hour < 5",
             f"{late} late-night events",
             0.80

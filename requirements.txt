@@ -5,3 +5,9 @@ qdrant-client>=1.13
 python-dotenv
 google-genai
 pytest>=9.0.0
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+umap-learn>=0.5
+hdbscan>=0.8
+rich>=13.0

@@ -21,8 +21,9 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import duckdb
 from dotenv import load_dotenv
@@ -32,8 +33,7 @@ load_dotenv(Path(__file__).parent / ".env")
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-# CST offset
-CST = timezone(timedelta(hours=-6))
+LOCAL_TZ = ZoneInfo("America/Chicago")
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +265,7 @@ def format_data_briefing(data: dict) -> str:
             lines.append(f"| {t['day']} | {t['events']} |")
 
     lines.append("")
-    lines.append(f"*Generated: {datetime.now(CST).isoformat()}*")
+    lines.append(f"*Generated: {datetime.now(LOCAL_TZ).isoformat()}*")
 
     return "\n".join(lines)
 
@@ -286,7 +286,7 @@ def main() -> None:
                         help="Save briefing to output/ (default: True)")
     args = parser.parse_args()
 
-    target_date = args.date or datetime.now(CST).strftime("%Y-%m-%d")
+    target_date = args.date or datetime.now(LOCAL_TZ).strftime("%Y-%m-%d")
 
     print(f"ME-OPS Morning Briefing — {target_date}")
     print("=" * 60)

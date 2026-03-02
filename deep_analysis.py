@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ME-OPS Deep Analysis — behavioral self-architecture engine.
 
-Mines 28K+ events across 64 days to extract:
+Mines behavioral events to extract:
 1. Temporal superpowers (when you're unstoppable)
 2. Flow state triggers (what enters you into deep work)
 3. Failure modes (exact conditions that cause underperformance)
@@ -24,8 +24,9 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import duckdb
 from dotenv import load_dotenv
@@ -34,7 +35,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).parent / "output"
-CST = timezone(timedelta(hours=-6))
+LOCAL_TZ = ZoneInfo("America/Chicago")
 
 
 def _connect() -> duckdb.DuckDBPyConnection:
@@ -441,8 +442,8 @@ def generate_blueprint(analysis: dict) -> str:
 
     lines.append("# ME-OPS DEEP ANALYSIS")
     lines.append("## Self-Architecture Blueprint")
-    lines.append(f"*Generated: {datetime.now(CST).strftime('%Y-%m-%d %H:%M CST')}*")
-    lines.append(f"*Data: 28,013 events | 64 days | 206 sessions | Dec 2025 → Feb 2026*")
+    lines.append(f"*Generated: {datetime.now(LOCAL_TZ).strftime('%Y-%m-%d %H:%M local time')}*")
+    lines.append(f"*Data: runtime-derived from your local warehouse*")
     lines.append("")
 
     # ── SECTION 1: TEMPORAL SUPERPOWERS ──
@@ -453,7 +454,7 @@ def generate_blueprint(analysis: dict) -> str:
 
     temporal = analysis["temporal"]
     lines.append("### Peak Performance Hours")
-    lines.append("| Rank | Hour (CST) | Score | Sessions | Events/min | Actions |")
+    lines.append("| Rank | Hour (local time) | Score | Sessions | Events/min | Actions |")
     lines.append("|------|-----------|-------|----------|------------|---------|")
     for i, h in enumerate(temporal["peak_hours"]):
         medal = ["🥇", "🥈", "🥉", "4th", "5th"][i]
@@ -496,7 +497,7 @@ def generate_blueprint(analysis: dict) -> str:
     lines.append("")
     lines.append("### Flow Entry Points")
     for h in flow["flow_trigger_hours"]:
-        lines.append(f"- **{h['hour']:02d}:00 CST** → {h['count']} flow sessions started here")
+        lines.append(f"- **{h['hour']:02d}:00 local time** → {h['count']} flow sessions started here")
 
     comp = flow.get("quartile_comparison", {})
     top = comp.get("top_25", {})
@@ -540,7 +541,7 @@ def generate_blueprint(analysis: dict) -> str:
         lines.append(f"- After **{aft['sample_size']}** late sessions (10PM-5AM):")
         lines.append(f"  - Avg late session output: **{aft['avg_late_events']:.0f}** events")
         lines.append(f"  - Recovery gap: **{aft['recovery_gap_hours']:.1f} hours**")
-        lines.append(f"  - Next session starts: **{aft['next_session_start_hr']:.1f}h CST**")
+        lines.append(f"  - Next session starts: **{aft['next_session_start_hr']:.1f}h local time**")
         lines.append(f"  - Next session output: **{aft['next_session_events']:.0f}** events in {aft['next_session_duration']:.0f}m")
 
     # ── SECTION 4: SUCCESS PATTERNS ──
@@ -614,7 +615,7 @@ def generate_blueprint(analysis: dict) -> str:
 
     lines.append("### ✅ DO (proven by your data)")
     if peak:
-        lines.append(f"1. **Schedule deep work at {peak['hour']:02d}:00 CST** — your peak "
+        lines.append(f"1. **Schedule deep work at {peak['hour']:02d}:00 local time** — your peak "
                       f"productivity score ({peak['score']}) is {peak['score'] / (dead['score'] if dead else 1):.1f}x "
                       f"higher than your worst hour")
 
@@ -662,7 +663,7 @@ def generate_blueprint(analysis: dict) -> str:
 
     lines.append("")
     lines.append("---")
-    lines.append(f"*Analysis complete. {datetime.now(CST).isoformat()}*")
+    lines.append(f"*Analysis complete. {datetime.now(LOCAL_TZ).isoformat()}*")
 
     return "\n".join(lines)
 
@@ -756,7 +757,7 @@ def main() -> None:
 
     # Save
     OUTPUT_DIR.mkdir(exist_ok=True)
-    today = datetime.now(CST).strftime("%Y-%m-%d")
+    today = datetime.now(LOCAL_TZ).strftime("%Y-%m-%d")
     out_file = OUTPUT_DIR / f"deep_analysis_{today}.md"
     out_file.write_text(full_report, encoding="utf-8")
     print(f"\n{'=' * 60}")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ME-OPS Architect — extract, modularize, and rebuild your workflows.
 
-Mines 28K events + 65K LTM memories to:
+Mines behavioral events and LTM memories to:
 1. Extract actual working patterns into named, modular workflows.
 2. Score each workflow on effectiveness (output, focus, health).
 3. Generate coaching rules that are evidence-backed.
@@ -18,8 +18,9 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
@@ -31,7 +32,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
-CST = timezone(timedelta(hours=-6))
+LOCAL_TZ = ZoneInfo("America/Chicago")
 
 # ---------------------------------------------------------------------------
 # Schema Definitions
@@ -201,7 +202,7 @@ def extract_workflows(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
         "frequency": freq_browse[0] if freq_browse and freq_browse[0] else 10004,
         "effectiveness": 0.3,
         "category": "research",
-        "recommendation": ("DANGER: This is your #1 time sink (44.4% of all events). "
+        "recommendation": ("DANGER: This is your #1 time sink (compute exact % from events before acting). "
                           "Set a hard 15-min timer. After 3 visits, MUST switch to "
                           "Annotation Pipeline to capture what you learned."),
     })
@@ -269,7 +270,7 @@ def extract_workflows(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
     workflows.append({
         "workflow_id": wf_id,
         "name": "Late Night Push",
-        "description": ("Work sessions starting 10PM-5AM CST. High productivity score "
+        "description": ("Work sessions starting 10PM-5AM local time. High productivity score "
                         "at 3AM (!) but costs 5.5h recovery gap next day."),
         "action_sequence": "late start → sustained work → eventual crash",
         "trigger_hour": 22,
@@ -443,7 +444,7 @@ def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, An
     rules.append({
         "rule_id": rid,
         "category": "health",
-        "rule_text": "Stop work by 11PM CST. Late sessions cost 5.5h recovery gap and net negative output.",
+        "rule_text": "Stop work by 11PM local time. Late sessions are associated with longer recovery gaps and lower next-day output.",
         "evidence_sql": "SELECT COUNT(*) FROM events WHERE EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) >= 23",
         "evidence_count": late,
         "severity": "high",
@@ -810,12 +811,12 @@ def generate_report(
         Markdown-formatted report string.
     """
     lines: List[str] = []
-    now = datetime.now(CST)
+    now = datetime.now(LOCAL_TZ)
 
     # First line must be H1
     lines.append("# ME-OPS ARCHITECT REPORT")
     lines.append("")
-    lines.append(f"*Generated: {now.strftime('%Y-%m-%d %H:%M CST')}*")
+    lines.append(f"*Generated: {now.strftime('%Y-%m-%d %H:%M %Z')}*")
     lines.append("")
 
     lines.append("---")
@@ -977,7 +978,7 @@ def main() -> None:
     print(report)
 
     OUTPUT_DIR.mkdir(exist_ok=True)
-    today = datetime.now(CST).strftime("%Y-%m-%d")
+    today = datetime.now(LOCAL_TZ).strftime("%Y-%m-%d")
     out_path = OUTPUT_DIR / f"architect_{today}.md"
     out_path.write_text(report, encoding="utf-8")
     print(f"\nSaved to: {out_path}")

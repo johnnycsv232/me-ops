@@ -1,6 +1,6 @@
 """ME-OPS Centralized Prompt Library.
 
-Every AI interaction in ME-OPS uses prompts from this file.
+Central prompt library for modules that import it; some scripts currently embed prompts locally and should be migrated.
 Design follows prompt-engineering SKILL best practices:
   - Role assignment + constraints + output format
   - Chain-of-thought reasoning instructions
@@ -30,7 +30,7 @@ OUTPUT RULES:
 5. When suggesting changes, reference the specific workflow to modify
 
 AVAILABLE DATA:
-- events (28K+): action, target, timestamps, projects, tools
+- events (runtime-derived): action, target, timestamps, projects, tools
 - sessions (210+): duration, dominant_action, projects
 - discovered_workflows (10): named modular patterns with effectiveness scores
 - coaching_rules (10): evidence-backed rules with severity

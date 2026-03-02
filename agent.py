@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """ME-OPS Personal Agent — Gemini-powered natural-language interface to your data.
 
-Uses the google-genai SDK (GA) with automatic function calling to let
+Uses the google-genai SDK (GA) tool-calling API to let
 Gemini query your DuckDB behavioral database in natural language.
+Automatic function calling is disabled; dispatch is handled locally.
 
 Skills used: ai-engineer (agent architecture + tool definition),
              prompt-engineering (system prompt design),
@@ -45,7 +46,7 @@ MODEL_ID = "gemini-2.5-flash"  # fast + tool-calling capable
 SYSTEM_PROMPT = """\
 You are ME-OPS Agent — a personal analytics assistant AND behavioral coach
 for a software developer named Johnny Cage. You have access to a DuckDB
-database containing 28K+ behavioral events, modularized workflows, coaching
+database containing behavioral events, modularized workflows, coaching
 rules, and daily performance scores.
 
 ## Your capabilities
@@ -79,13 +80,13 @@ rules, and daily performance scores.
    - context_switches, entity_summary, session_clusters
 3. When discussing performance, reference coaching rules by number.
 4. When discussing work patterns, use modular workflow names.
-5. Timestamps are UTC. User timezone = CST (UTC-6).
+5. Timestamps are UTC. User timezone is America/Chicago (DST-aware).
 6. Present results in clear, concise markdown.
 """
 
 
 # ---------------------------------------------------------------------------
-# Tool definitions — google-genai automatic function calling
+# Tool definitions — google-genai tool-calling
 # ---------------------------------------------------------------------------
 
 def _get_connection() -> duckdb.DuckDBPyConnection:

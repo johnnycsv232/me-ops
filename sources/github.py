@@ -51,7 +51,7 @@ def _gh_headers() -> dict[str, str]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     else:
-        print("  ⚠️  GITHUB_TOKEN not set — rate-limited to 60 req/hr",
+        print("  ⚠️  GITHUB_TOKEN not set — unauthenticated REST requests limited to 60 req/hr per IP",
               file=sys.stderr)
     return headers
 

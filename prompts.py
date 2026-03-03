@@ -1,12 +1,11 @@
 """ME-OPS Centralized Prompt Library.
 
-Every AI interaction in ME-OPS uses prompts from this file.
-Design follows prompt-engineering SKILL best practices:
+Central prompt library for modules that import it; some scripts
+currently embed prompts locally and should be migrated.
+Design follows prompt-engineering best practices:
   - Role assignment + constraints + output format
   - Chain-of-thought reasoning instructions
   - Structured JSON schemas where applicable
-
-Skills used: prompt-engineering
 """
 
 # ---------------------------------------------------------------------------

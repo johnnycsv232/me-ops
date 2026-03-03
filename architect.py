@@ -31,7 +31,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
-CST = timezone(timedelta(hours=-6))
+from time_utils import local_now, LOCAL_TZ
 
 # ---------------------------------------------------------------------------
 # Schema Definitions
@@ -846,7 +846,7 @@ def generate_report(
         Markdown-formatted report string.
     """
     lines: List[str] = []
-    now = datetime.now(CST)
+    now = local_now()
 
     # First line must be H1
     lines.append("# ME-OPS ARCHITECT REPORT")
@@ -1014,7 +1014,7 @@ def main() -> None:
     print(report)
 
     OUTPUT_DIR.mkdir(exist_ok=True)
-    today = datetime.now(CST).strftime("%Y-%m-%d")
+    today = local_now().strftime("%Y-%m-%d")
     out_path = OUTPUT_DIR / f"architect_{today}.md"
     out_path.write_text(report, encoding="utf-8")
     print(f"\nSaved to: {out_path}")

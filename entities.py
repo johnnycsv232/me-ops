@@ -139,6 +139,7 @@ def run(db_path: Path, con: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         SELECT f.extension,
                COUNT(DISTINCT f.file_id),
                COUNT(DISTINCT ef.event_id),
+               -- MODE() returns most frequent value; ties are non-deterministic
                MODE(f.repo_root)
         FROM files f
         LEFT JOIN event_files ef ON f.file_id = ef.file_id

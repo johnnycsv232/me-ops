@@ -36,7 +36,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).parent / "output"
-CST = timezone(timedelta(hours=-6))
+from time_utils import local_now, LOCAL_TZ
 
 
 def _connect() -> duckdb.DuckDBPyConnection:
@@ -443,8 +443,8 @@ def generate_blueprint(analysis: dict) -> str:
 
     lines.append("# ME-OPS DEEP ANALYSIS")
     lines.append("## Self-Architecture Blueprint")
-    lines.append(f"*Generated: {datetime.now(CST).strftime('%Y-%m-%d %H:%M CST')}*")
-    lines.append("*Data: 28,013 events | 64 days | 206 sessions | Dec 2025 → Feb 2026*")
+    lines.append(f"*Generated: {local_now().strftime('%Y-%m-%d %H:%M %Z')}*")
+    lines.append("*Data drawn from ingested events — counts computed at runtime.*")
     lines.append("")
 
     # ── SECTION 1: TEMPORAL SUPERPOWERS ──
@@ -664,7 +664,7 @@ def generate_blueprint(analysis: dict) -> str:
 
     lines.append("")
     lines.append("---")
-    lines.append(f"*Analysis complete. {datetime.now(CST).isoformat()}*")
+    lines.append(f"*Analysis complete. {local_now().isoformat()}*")
 
     return "\n".join(lines)
 
@@ -749,7 +749,7 @@ def run(db_path: Path, *, con: Optional[duckdb.DuckDBPyConnection] = None, ai: b
 
         # Save
         OUTPUT_DIR.mkdir(exist_ok=True)
-        today = datetime.now(CST).strftime("%Y-%m-%d")
+        today = local_now().strftime("%Y-%m-%d")
         out_file = OUTPUT_DIR / f"deep_analysis_{today}.md"
         out_file.write_text(full_report, encoding="utf-8")
         print(f"\n{'=' * 60}")

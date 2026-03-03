@@ -80,7 +80,7 @@ rules, and daily performance scores.
    - context_switches, entity_summary, session_clusters
 3. When discussing performance, reference coaching rules by number.
 4. When discussing work patterns, use modular workflow names.
-5. Timestamps are UTC. User timezone = CST (UTC-6).
+5. Timestamps are UTC. User timezone = America/Chicago (CST/CDT auto).
 6. Present results in clear, concise markdown.
 """
 
@@ -301,7 +301,7 @@ def get_workflows() -> str:
 
 def get_insight_prompts_tool() -> str:
     """Retrieve discovery-based prompts to unlock hidden behavioral insights.
-    
+
     Use this tool when the user asks for inspiration, 'crazy useful' insights,
     or how to unlock deeper understanding of their data.
     """

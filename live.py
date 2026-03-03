@@ -7,12 +7,8 @@ Polls the DuckDB database and renders a terminal dashboard with:
 - Active behavioral cluster assignment
 - Alert bar for anti-playbook violations
 
-Skills used: workflow-patterns (polling loop + state management),
-             production-code-audit (error handling, graceful shutdown),
-             ai-engineer (real-time inference on session data)
-
-Ref: https://docs.python.org/3/library/curses.html (official)
-     https://rich.readthedocs.io/en/stable/live.html (Rich Live)
+Terminal dashboard rendering uses plain ANSI output.
+Rich Live integration is planned but not yet implemented.
 
 Usage:
     python live.py                 # Start dashboard (polls every 10s)
@@ -30,8 +26,7 @@ import duckdb
 
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 
-# Timezone offset for CST (UTC-6)
-CST = timezone(timedelta(hours=-6))
+from time_utils import local_now, LOCAL_TZ
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +49,7 @@ def _table_exists(con: duckdb.DuckDBPyConnection, name: str) -> bool:
 
 def get_today_stats(con: duckdb.DuckDBPyConnection) -> dict:
     """Get today's running totals."""
-    today = datetime.now(CST).strftime("%Y-%m-%d")
+    today = local_now().strftime("%Y-%m-%d")
     row = con.execute("""
         SELECT
             COUNT(*) AS events,
@@ -149,7 +144,7 @@ def get_active_warnings(con: duckdb.DuckDBPyConnection) -> list[str]:
 
 def get_top_projects_today(con: duckdb.DuckDBPyConnection) -> list[tuple[str, int]]:
     """Get today's top projects by event count."""
-    today = datetime.now(CST).strftime("%Y-%m-%d")
+    today = local_now().strftime("%Y-%m-%d")
     rows = con.execute("""
         SELECT p.name, COUNT(ep.event_id) AS events
         FROM event_projects ep
@@ -171,7 +166,7 @@ def render_dashboard(once: bool = False) -> None:
     """Render dashboard to terminal."""
     con = _connect()
 
-    now = datetime.now(CST)
+    now = local_now()
     today = get_today_stats(con)
     avg = get_7day_avg(con)
     cluster = get_active_cluster(con)

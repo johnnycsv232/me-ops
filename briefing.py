@@ -34,8 +34,7 @@ load_dotenv(Path(__file__).parent / ".env")
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-# CST offset
-CST = timezone(timedelta(hours=-6))
+from time_utils import local_now, LOCAL_TZ
 
 
 # ---------------------------------------------------------------------------
@@ -268,7 +267,7 @@ def format_data_briefing(data: dict) -> str:
             lines.append(f"| {t['day']} | {t['events']} |")
 
     lines.append("")
-    lines.append(f"*Generated: {datetime.now(CST).isoformat()}*")
+    lines.append(f"*Generated: {local_now().isoformat()}*")
 
     return "\n".join(lines)
 
@@ -289,7 +288,7 @@ def run(
         close_con = True
 
     if target_date is None:
-        target_date = datetime.now(CST).strftime("%Y-%m-%d")
+        target_date = local_now().strftime("%Y-%m-%d")
 
     try:
         data = collect_briefing_data(con, target_date)
@@ -334,7 +333,7 @@ def main() -> None:
                         help="Save briefing to output/ (default: True)")
     args = parser.parse_args()
 
-    target_date = args.date or datetime.now(CST).strftime("%Y-%m-%d")
+    target_date = args.date or local_now().strftime("%Y-%m-%d")
 
     print(f"ME-OPS Morning Briefing — {target_date}")
     print("=" * 60)

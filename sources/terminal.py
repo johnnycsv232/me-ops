@@ -3,6 +3,8 @@
 
 Reads .bash_history or .zsh_history and converts commands into
 ME-OPS events, enriching with project detection and tool classification.
+Fish history (~/.local/share/fish/fish_history) is detected but not
+parsed in this module yet.
 
 Skills used: production-code-audit (path security, input validation),
              workflow-patterns (incremental processing with watermark)
@@ -219,7 +221,7 @@ def ingest_history(
 
         # Truncate cmd to 500 chars safely, ensuring it's treated as string
         cmd_str = str(cmd)
-        
+
         con.execute("""
             INSERT INTO events (event_id, ts_start, action, target,
                                app_tool, source_file)

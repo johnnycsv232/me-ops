@@ -27,7 +27,13 @@ from pathlib import Path
 import duckdb
 
 DB_PATH = Path(__file__).resolve().parent.parent / "me_ops.duckdb"
-CST = timezone(timedelta(hours=-6))
+
+# Ensure the parent directory is in the Python path for imports
+root_path = Path(__file__).resolve().parent.parent
+if str(root_path) not in sys.path:
+    sys.path.insert(0, str(root_path))
+
+from time_utils import local_now, local_date, LOCAL_TZ
 
 # Tool classification rules
 TOOL_PATTERNS: dict[str, str] = {
@@ -87,8 +93,8 @@ def parse_bash_history(filepath: Path) -> list[dict]:
                 continue
 
             # Bash HISTTIMEFORMAT: lines starting with #<epoch>
-            if line.startswith("#") and line[1:].isdigit():
-                epoch = int(line[1:])
+            if line.startswith("#") and str(line)[1:].isdigit():
+                epoch = int(str(line)[1:])
                 current_ts = datetime.fromtimestamp(epoch, tz=timezone.utc).isoformat()
                 continue
 
@@ -211,11 +217,14 @@ def ingest_history(
         action, tool = classify_command(cmd)
         project = detect_project(cmd)
 
+        # Truncate cmd to 500 chars safely, ensuring it's treated as string
+        cmd_str = str(cmd)
+        
         con.execute("""
             INSERT INTO events (event_id, ts_start, action, target,
                                app_tool, source_file)
             VALUES (?, ?, ?, ?, ?, 'shell_history')
-        """, [event_id, ts, action, cmd[:500], tool or "terminal"])
+        """, [event_id, ts, action, cmd_str[:500], tool or "terminal"])
 
         # Link to project if detected
         if project:

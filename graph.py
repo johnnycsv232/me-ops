@@ -3,7 +3,9 @@
 
 Builds an adjacency-based knowledge graph from existing link tables
 (event_projects, event_tools, event_files, event_tags) and exposes
-multi-hop traversal queries without requiring the DuckPGQ extension.
+multi-hop traversal queries using standard SQL (no DuckDB extensions required).
+
+Prerequisite: tables from ingest.py and workflows.py must exist in the database.
 
 Skills used: software-architecture (DDD: entities as vertices, clean separation),
              production-code-audit (verification loop)

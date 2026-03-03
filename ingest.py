@@ -1,7 +1,7 @@
 """
 ME-OPS Ingestion Pipeline
 =========================
-Parses 19 Pieces LTM JSON exports into a normalized DuckDB warehouse.
+Parses Pieces LTM JSON exports into a normalized DuckDB warehouse.
 
 Tables created:
   - raw_sources: file metadata + SHA256 hashes
@@ -16,7 +16,8 @@ import argparse
 import hashlib
 import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime
+from time_utils import local_now, local_date, LOCAL_TZ
 from pathlib import Path
 from typing import Any
 

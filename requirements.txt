@@ -1,8 +1,20 @@
+# --- Base Dependencies ---
 duckdb>=1.2.0
-networkx>=3.4
-sentence-transformers>=3.4
-qdrant-client>=1.13
 python-dotenv
 google-genai
+rich>=13.0
 pytest>=9.0.0
 pyright>=1.1.350
+
+# --- Required for ML/Predictive (Optional) ---
+# Install with: pip install -r requirements.txt
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+
+# --- Required for Vectors/Clustering (Optional) ---
+sentence-transformers>=3.4
+qdrant-client>=1.13
+umap-learn>=0.5
+hdbscan>=0.8
+networkx>=3.4

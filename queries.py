@@ -19,7 +19,7 @@ DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 QUERIES: list[tuple[str, str]] = [
     # --- Data Integrity ---
     (
-        "1. Source coverage (all 19 files registered)",
+        "1. Source coverage (all files registered)",
         "SELECT COUNT(*) AS sources, SUM(record_count) AS total_records, "
         "printf('%.1f MB', SUM(byte_size)/1e6) AS total_size FROM raw_sources",
     ),

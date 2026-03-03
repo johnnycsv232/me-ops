@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """ME-OPS Master Runner — unified, efficient intelligence pipeline.
 
-Executes the full chain
-(Ingest -> Workflows -> Architect -> Workflow DNA -> Insights -> Action x Site)
-with shared connections and optimized concurrency.
+Runs core pipeline: Ingest -> Workflows -> Mistakes -> Architect -> Workflow DNA -> Insights.
+Other modules (cluster, vectors, graph, predict) run separately.
 
 Usage:
     python master.py [--ai] [--refresh]
@@ -234,7 +233,7 @@ def main():
 
             # 13-18. Concurrent Read-Only Analytical Execution
             print("\n[13-18/18] CONCURRENT ANALYTICS: Launching read-only engines...")
-            
+
             # We define thread-safe helper functions for each read-only analytical phase
             def run_workflow_dna() -> Dict[str, Any]:
                 return workflow_dna.run(db_path=db_path, con=con.cursor(), output_dir=root_dir / "output")
@@ -350,7 +349,7 @@ def main():
 
             # 8. Warehouse Persistence
             print("\n[WAREHOUSE] Storing integrated intelligence...")
-            
+
             # Prepare payloads for warehouse
             # Only persist a briefing if AI narrative was actually generated
             briefing_data = None
@@ -411,12 +410,12 @@ def main():
             warehouse.persist_intelligence_snapshot(con, report_date, warehouse_payload)
         finally:
             con.close()
-        
+
         # Final Output
         print("\n" + "=" * 60)
         print("MASTER REPORT GENERATED")
         print("=" * 60)
-        
+
         out_file = Path("output") / f"master_report_{report_date}.md"
         out_file.parent.mkdir(exist_ok=True)
         out_file.write_text(report, encoding="utf-8")
@@ -425,7 +424,7 @@ def main():
         insight_md_file = Path("output") / f"insights_{report_date}.md"
         insight_json_file.write_text(json.dumps(insight_payload, indent=2), encoding="utf-8")
         insight_md_file.write_text(insight_md, encoding="utf-8")
-        
+
         print(f"\nReport saved to: {out_file}")
         print(f"Insights JSON saved to: {insight_json_file}")
         print(f"Insights markdown saved to: {insight_md_file}")
@@ -442,11 +441,11 @@ def main():
         profiler.enable()
         exit_code = execute_pipeline()
         profiler.disable()
-        
+
         prof_file = "master.prof"
         profiler.dump_stats(prof_file)
         print(f"\n[PROFILING] Profile saved to {prof_file}")
-        
+
         print("\n[PROFILING] Top 20 cumulative time bottlenecks:")
         stats = pstats.Stats(profiler)
         stats.sort_stats(SortKey.CUMULATIVE).print_stats(20)

@@ -54,7 +54,7 @@ def analyze_temporal(con: duckdb.DuckDBPyConnection) -> dict:
     # Productivity score by hour (events/min * action_diversity)
     hourly = con.execute("""
         SELECT
-            EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) as hr,
+            EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as hr,
             COUNT(*) as sessions,
             ROUND(AVG(event_count::FLOAT / GREATEST(duration_min, 1)), 3) as evt_per_min,
             ROUND(AVG(unique_actions), 1) as avg_actions,
@@ -66,8 +66,8 @@ def analyze_temporal(con: duckdb.DuckDBPyConnection) -> dict:
     # Day of week ranking
     daily = con.execute("""
         SELECT
-            DAYNAME(ts_start - INTERVAL 6 HOUR) as dow,
-            EXTRACT(DOW FROM ts_start - INTERVAL 6 HOUR) as dow_num,
+            DAYNAME(ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as dow,
+            EXTRACT(DOW FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as dow_num,
             COUNT(*) as events,
             COUNT(DISTINCT ts_start::DATE) as active_days,
             ROUND(COUNT(*) * 1.0 / NULLIF(COUNT(DISTINCT ts_start::DATE), 0), 0) as events_per_day
@@ -78,7 +78,7 @@ def analyze_temporal(con: duckdb.DuckDBPyConnection) -> dict:
     # Weekly evolution trend
     weekly = con.execute("""
         SELECT
-            EXTRACT(WEEK FROM ts_start - INTERVAL 6 HOUR) as week,
+            EXTRACT(WEEK FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as week,
             MIN(ts_start::DATE) as week_start,
             COUNT(*) as events,
             COUNT(DISTINCT ts_start::DATE) as active_days,
@@ -119,7 +119,7 @@ def analyze_flow_states(con: duckdb.DuckDBPyConnection) -> dict:
     # Flow sessions: high output AND high diversity AND long duration
     flow = con.execute("""
         SELECT s.session_id, s.ts_start::DATE as date,
-               EXTRACT(HOUR FROM s.ts_start - INTERVAL 6 HOUR) as start_hr,
+               EXTRACT(HOUR FROM s.ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as start_hr,
                s.duration_min, s.event_count, s.unique_actions,
                COALESCE(s.projects, '—') as projects,
                COALESCE(sc.cluster_name, '—') as cluster
@@ -131,7 +131,7 @@ def analyze_flow_states(con: duckdb.DuckDBPyConnection) -> dict:
 
     # What time do flow states start?
     flow_hours = con.execute("""
-        SELECT EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) as hr, COUNT(*) as cnt
+        SELECT EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as hr, COUNT(*) as cnt
         FROM sessions
         WHERE event_count > 100 AND unique_actions >= 4 AND duration_min > 60
         GROUP BY hr ORDER BY cnt DESC
@@ -141,7 +141,7 @@ def analyze_flow_states(con: duckdb.DuckDBPyConnection) -> dict:
     comparison = con.execute("""
         WITH ranked AS (
             SELECT *, NTILE(4) OVER (ORDER BY event_count) as quartile,
-                EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) as hr
+                EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as hr
             FROM sessions WHERE duration_min > 10
         )
         SELECT
@@ -223,14 +223,14 @@ def analyze_failures(con: duckdb.DuckDBPyConnection) -> dict:
         WITH late AS (
             SELECT session_id, ts_start, ts_end, duration_min, event_count
             FROM sessions
-            WHERE EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) >= 22
-               OR EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) < 5
+            WHERE EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') >= 22
+               OR EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') < 5
         ),
         next_session AS (
             SELECT l.session_id as late_id,
                    l.event_count as late_events,
                    s.duration_min as next_dur, s.event_count as next_events,
-                   EXTRACT(HOUR FROM s.ts_start - INTERVAL 6 HOUR) as next_start_hr,
+                   EXTRACT(HOUR FROM s.ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as next_start_hr,
                    EXTRACT(EPOCH FROM s.ts_start - l.ts_end) / 3600 as gap_hours
             FROM late l JOIN sessions s ON s.ts_start > l.ts_end
             QUALIFY ROW_NUMBER() OVER (PARTITION BY l.session_id ORDER BY s.ts_start) = 1
@@ -280,11 +280,11 @@ def analyze_success(con: duckdb.DuckDBPyConnection) -> dict:
     best_days = con.execute("""
         SELECT
             ts_start::DATE as day,
-            DAYNAME(ts_start - INTERVAL 6 HOUR) as dow,
+            DAYNAME(ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') as dow,
             COUNT(*) as events,
             COUNT(DISTINCT action) as actions,
-            MIN(EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR)) as earliest_hr,
-            MAX(EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR)) as latest_hr
+            MIN(EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago')) as earliest_hr,
+            MAX(EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago')) as latest_hr
         FROM events WHERE ts_start IS NOT NULL
         GROUP BY day, dow ORDER BY events DESC LIMIT 5
     """).fetchall()
@@ -682,6 +682,7 @@ def generate_ai_narrative(analysis: dict) -> str | None:
     try:
         from google import genai
         from google.genai import types
+        from time_utils import DEFAULT_MODEL_ID
 
         client = genai.Client(api_key=api_key)
 
@@ -699,7 +700,7 @@ Data summary:
 Be specific. Use numbers. No generic advice."""
 
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=DEFAULT_MODEL_ID,
             contents=prompt,
             config=types.GenerateContentConfig(temperature=0.4),
         )

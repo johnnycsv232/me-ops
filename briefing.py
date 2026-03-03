@@ -183,13 +183,14 @@ def generate_ai_briefing(data: dict) -> str | None:
     try:
         from google import genai
         from google.genai import types
+        from time_utils import DEFAULT_MODEL_ID
 
         client = genai.Client(api_key=api_key)
 
         prompt = BRIEFING_PROMPT.format(data_json=json.dumps(data, indent=2))
 
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=DEFAULT_MODEL_ID,
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.3,

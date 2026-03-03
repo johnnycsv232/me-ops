@@ -33,7 +33,7 @@ from action_site_insights import infer_site
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"
 OUTPUT_DIR = Path(__file__).resolve().parent / "output"
-CST = timezone(timedelta(hours=-6))
+
 
 DNA_DDL = """
 CREATE TABLE IF NOT EXISTS workflow_dna_markers (
@@ -1177,7 +1177,7 @@ def _extract_coverage_profile(events: Sequence[Dict[str, Any]]) -> Dict[str, Any
 
 
 def generate_workflow_dna_report(payload: Dict[str, Any]) -> str:
-    now = datetime.now(CST).strftime("%Y-%m-%d %H:%M CST")
+    now = local_now().strftime("%Y-%m-%d %H:%M CST")
     coverage = payload.get("coverage", {})
     profile = payload.get("style_profile", {})
     markers = payload.get("genetic_markers", [])
@@ -1367,7 +1367,7 @@ def _init_schema(con: duckdb.DuckDBPyConnection) -> None:
 
 
 def _persist_payload(con: duckdb.DuckDBPyConnection, payload: Dict[str, Any]) -> None:
-    snapshot_date = datetime.now(CST).date().isoformat()
+    snapshot_date = local_now().date().isoformat()
     markers = payload.get("genetic_markers", [])
     profile = payload.get("style_profile", {})
 
@@ -1474,7 +1474,7 @@ def run(
         report_path = output_root / "WORKFLOW_DNA_REPORT.md"
         report_path.write_text(report_text, encoding="utf-8")
 
-        today = datetime.now(CST).strftime("%Y-%m-%d")
+        today = local_date(local_now())
         json_path = output_root / f"workflow_dna_{today}.json"
 
         dna_payload["report_path"] = str(report_path)
@@ -1525,7 +1525,7 @@ def export_signals_to_orchestrator(
 ) -> None:
     """Export critical behavioral signals to the orchestrator."""
     from orchestrator import Orchestrator, Signal, ActionItem
-    
+
     orch = Orchestrator()
 
     for b in bottlenecks:

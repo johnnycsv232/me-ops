@@ -4,7 +4,6 @@
 Trains models on session features to predict:
 1. Will I context-thrash today? (classification)
 2. How long will my next session be? (regression)
-3. What project will I focus on? (multi-class)
 
 Skills used: ai-engineer (ML pipeline),
              testing-patterns (train/test split, cross-validation)

@@ -32,9 +32,10 @@ from google.genai import types
 # ---------------------------------------------------------------------------
 
 load_dotenv(Path(__file__).parent / ".env")
+from time_utils import DEFAULT_MODEL_ID
 
 DB_PATH = Path(__file__).parent / "me_ops.duckdb"
-MODEL_ID = "gemini-2.5-flash"  # fast + tool-calling capable
+MODEL_ID = DEFAULT_MODEL_ID
 
 
 # ---------------------------------------------------------------------------

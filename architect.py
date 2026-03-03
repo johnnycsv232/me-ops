@@ -131,7 +131,7 @@ def _table_exists(con: duckdb.DuckDBPyConnection, table_name: str) -> bool:
 def extract_workflows(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
     """Mines actual user workflows and modularizes them into named patterns.
 
-    Analyzes sequences of actions and existing workflow patterns to identify 
+    Analyzes sequences of actions and existing workflow patterns to identify
     modular working modes (e.g., Research Loop, Content Pipeline).
 
     Args:
@@ -264,7 +264,7 @@ def extract_workflows(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
         "frequency": multi[0] if multi else 44,
         "effectiveness": 0.5,
         "category": "execution",
-        "recommendation": ("AVOID when possible. Each switch costs ~23 min re-focus. "
+        "recommendation": ("AVOID when possible. Resumption lags are often tens of minutes in field observations. "
                           "If unavoidable, use 'batch mode': finish one project's "
                           "task list COMPLETELY before switching."),
     })
@@ -273,8 +273,8 @@ def extract_workflows(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
     late = con.execute("""
         SELECT COUNT(*), ROUND(AVG(duration_min), 0), ROUND(AVG(event_count), 0)
         FROM sessions
-        WHERE EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) >= 22
-           OR EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) < 5
+        WHERE EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') >= 22
+           OR EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') < 5
     """).fetchone()
 
     wf_id += 1
@@ -396,7 +396,7 @@ def extract_workflows(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
 def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
     """Generates evidence-backed coaching rules from behavioral data.
 
-    Analyses trends and identifies suboptimal patterns to create 
+    Analyses trends and identifies suboptimal patterns to create
     actionable rules for productivity, health, and focus.
 
     Args:
@@ -472,15 +472,15 @@ def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, An
     # Rule 3: Late night cutoff
     late = con.execute("""
         SELECT COUNT(*) FROM events
-        WHERE EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) >= 23
-           OR EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) < 5
+        WHERE EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') >= 23
+           OR EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') < 5
     """).fetchone()[0]
     rid += 1
     rules.append({
         "rule_id": rid,
         "category": "health",
-        "rule_text": "Stop work by 11PM CST. Late sessions cost 5.5h recovery gap and net negative output.",
-        "evidence_sql": "SELECT COUNT(*) FROM events WHERE EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR) >= 23",
+        "rule_text": "Stop work by 11PM local time. Late sessions are associated with longer recovery gaps and lower next-day output.",
+        "evidence_sql": "SELECT COUNT(*) FROM events WHERE EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') >= 23",
         "evidence_count": late,
         "severity": "high",
         "confidence": 0.80,
@@ -488,14 +488,14 @@ def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, An
 
     # Rule 4: IronClad Offer vs Audience Balance
     iron_offer = con.execute("""
-        SELECT COUNT(*) FROM event_subcategories 
+        SELECT COUNT(*) FROM event_subcategories
         WHERE theme = 'IronClad' AND subcategory = 'Offer'
     """).fetchone()[0]
     iron_audience = con.execute("""
-        SELECT COUNT(*) FROM event_subcategories 
+        SELECT COUNT(*) FROM event_subcategories
         WHERE theme = 'IronClad' AND subcategory = 'Audience'
     """).fetchone()[0]
-    
+
     rid += 1
     rules.append({
         "rule_id": rid,
@@ -539,7 +539,7 @@ def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, An
 
     # Rule 7: AI Arbitrage Integration
     ai_prompts = con.execute("""
-        SELECT COUNT(*) FROM event_subcategories 
+        SELECT COUNT(*) FROM event_subcategories
         WHERE theme = 'AI Arbitrage' AND subcategory = 'Prompts'
     """).fetchone()[0]
     rid += 1
@@ -564,7 +564,7 @@ def generate_coaching_rules(con: duckdb.DuckDBPyConnection) -> List[Dict[str, An
 def compute_daily_scores(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
     """Computes 4-axis performance scores for every active day.
 
-    Calculates Focus, Output, Health, and Consistency scores to provide 
+    Calculates Focus, Output, Health, and Consistency scores to provide
     a holistic view of daily performance.
 
     Args:
@@ -587,8 +587,8 @@ def compute_daily_scores(con: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]
                 COUNT(*)::FLOAT as output_raw,
                 -- Health: penalty for late night + marathon sessions
                 CASE
-                    WHEN MAX(EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR)) >= 23
-                      OR MIN(EXTRACT(HOUR FROM ts_start - INTERVAL 6 HOUR)) < 5
+                    WHEN MAX(EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago')) >= 23
+                      OR MIN(EXTRACT(HOUR FROM ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago')) < 5
                     THEN 0.5
                     ELSE 1.0
                 END as health_raw
@@ -672,8 +672,8 @@ def track_improvement(con: duckdb.DuckDBPyConnection, rules: List[Dict[str, Any]
                 ) AS web_pct,
                 SUM(
                     CASE
-                        WHEN EXTRACT(HOUR FROM e.ts_start - INTERVAL 6 HOUR) >= 23
-                          OR EXTRACT(HOUR FROM e.ts_start - INTERVAL 6 HOUR) < 5
+                        WHEN EXTRACT(HOUR FROM e.ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') >= 23
+                          OR EXTRACT(HOUR FROM e.ts_start AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago') < 5
                         THEN 1
                         ELSE 0
                     END
@@ -820,7 +820,7 @@ def write_to_db(
                 INSERT INTO improvement_log (date, rule_id, violated, metric_value, target_value)
                 VALUES (?,?,?,?,?)
             """, improvement_rows)
-        
+
         con.execute("COMMIT")
         print("    -> Successfully wrote all phase data to DB")
     except Exception as e:
@@ -892,7 +892,7 @@ def generate_report(
     lines.append("")
     lines.append("| Date | Focus | Output | Health | Composite |")
     lines.append("| :--- | :--- | :--- | :--- | :--- |")
-    
+
     # Type-safe indexing to satisfy Pyre2
     n_scores = len(scores)
     start_idx = max(0, n_scores - 14)
@@ -929,12 +929,13 @@ def generate_ai_coaching(
     try:
         from google import genai
         from google.genai import types
+        from time_utils import DEFAULT_MODEL_ID
     except ImportError:
         print("  AI coaching requires 'google-genai' package.", file=sys.stderr)
         return None
 
     client = genai.Client(api_key=api_key)
-    
+
     # Type-safe slicing for Pyre2
     n_scores = len(scores)
     recent_scores = [scores[i] for i in range(max(0, n_scores - 7), n_scores)]
@@ -955,7 +956,7 @@ def generate_ai_coaching(
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model=DEFAULT_MODEL_ID,
                 contents=prompt,
                 config=types.GenerateContentConfig(temperature=0.3),
             )
@@ -967,7 +968,7 @@ def generate_ai_coaching(
                 time.sleep(wait)
                 continue
             print(f"  AI coaching failed: {e}", file=sys.stderr)
-    
+
     return None
 
 
@@ -1003,7 +1004,7 @@ def main() -> None:
         return
 
     report = generate_report(workflows, rules, scores, improvement)
-    
+
     if args.ai:
         print("  Generating AI coaching...")
         ai_narrative = generate_ai_coaching(workflows, rules, scores)

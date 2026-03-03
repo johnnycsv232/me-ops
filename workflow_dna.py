@@ -29,6 +29,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from action_site_insights import infer_site
+from time_utils import local_now, local_date, LOCAL_TZ
 
 
 DB_PATH = Path(__file__).resolve().parent / "me_ops.duckdb"

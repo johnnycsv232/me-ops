@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-02-22T07:04:45.741043",
+    "generated_at": "2026-03-02T22:35:58.063652",
     "user": "Johnny Cage",
     "system": "ME-OPS v1.0"
   },
@@ -159,7 +159,7 @@
       "effectiveness": 0.6,
       "category": "research",
       "recommendation": "Add a 15-min timer to prevent rabbit holes. Exit after 2 rounds max. If no answer, escalate to AI agent.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 2,
@@ -173,7 +173,7 @@
       "effectiveness": 0.8,
       "category": "documentation",
       "recommendation": "This is your strongest chain (0s gaps = instant flow). Use it immediately after completing any task to capture learnings.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 3,
@@ -187,7 +187,7 @@
       "effectiveness": 0.3,
       "category": "research",
       "recommendation": "DANGER: This is your #1 time sink (44.4% of all events). Set a hard 15-min timer. After 3 visits, MUST switch to Annotation Pipeline to capture what you learned.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 4,
@@ -201,7 +201,7 @@
       "effectiveness": 0.9,
       "category": "execution",
       "recommendation": "Your best workflow. Protect it: no Slack, no email, no browser tabs outside project scope. Schedule 2h blocks.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 5,
@@ -214,8 +214,8 @@
       "frequency": 59,
       "effectiveness": 0.5,
       "category": "execution",
-      "recommendation": "AVOID when possible. Each switch costs ~23 min re-focus. If unavoidable, use 'batch mode': finish one project's task list COMPLETELY before switching.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "recommendation": "AVOID when possible. Resumption lags are often tens of minutes in field observations. If unavoidable, use 'batch mode': finish one project's task list COMPLETELY before switching.",
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 6,
@@ -229,7 +229,7 @@
       "effectiveness": 0.4,
       "category": "health",
       "recommendation": "Your 3AM productivity (score 18.83) is real but unsustainable. The 5.5h recovery gap means net output is NEGATIVE vs sleeping and starting fresh at 6AM. Reserve for deadlines only.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 7,
@@ -243,7 +243,7 @@
       "effectiveness": 0.7,
       "category": "analysis",
       "recommendation": "Good analytical pattern. Improve by adding a 'conclusion step' \u2014 after 3 query rounds, force yourself to write a 1-sentence finding.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 8,
@@ -257,7 +257,7 @@
       "effectiveness": 0.7,
       "category": "execution",
       "recommendation": "NEEDS MORE of these. IronClad is your priority product but only has 5 focused sessions. Schedule daily 90-min blocks.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 9,
@@ -271,7 +271,7 @@
       "effectiveness": 0.2,
       "category": "overhead",
       "recommendation": "Cap at 30 min. If not solved, Docker/reset/move on. Your LTM shows 15+ config troubleshooting workstreams. Write a runbook and STOP reinventing the wheel.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     },
     {
       "workflow_id": 10,
@@ -285,45 +285,45 @@
       "effectiveness": 0.65,
       "category": "collaboration",
       "recommendation": "Good for unblocking. Limit to 45-min bursts. Always end with Annotation Pipeline to capture insights.",
-      "created_at": "2026-02-22 07:04:43.297937"
+      "created_at": "2026-03-02 22:35:57.255282"
     }
   ],
   "insights": {
     "Priority Actions": [
       {
         "title": "Priority 1",
+        "prompt": "Decide explicitly: revive `Miscellaneous::General` this week or archive it to remove mental overhead.",
+        "value": "Signal drift detected: Miscellaneous::General"
+      },
+      {
+        "title": "Priority 2",
         "prompt": "Decide explicitly: revive `IronClad::Content` this week or archive it to remove mental overhead.",
         "value": "Signal drift detected: IronClad::Content"
       },
       {
-        "title": "Priority 2",
+        "title": "Priority 3",
         "prompt": "Decide explicitly: revive `AI Arbitrage::Integration` this week or archive it to remove mental overhead.",
         "value": "Signal drift detected: AI Arbitrage::Integration"
       },
       {
-        "title": "Priority 3",
+        "title": "Priority 4",
         "prompt": "Decide explicitly: revive `GettUpp::Marketing` this week or archive it to remove mental overhead.",
         "value": "Signal drift detected: GettUpp::Marketing"
       },
       {
-        "title": "Priority 4",
+        "title": "Priority 5",
+        "prompt": "Decide explicitly: revive `Cristina/KB-DS::Memory` this week or archive it to remove mental overhead.",
+        "value": "Signal drift detected: Cristina/KB-DS::Memory"
+      },
+      {
+        "title": "Priority 6",
         "prompt": "Decide explicitly: revive `Cristina/KB-DS::Pattern` this week or archive it to remove mental overhead.",
         "value": "Signal drift detected: Cristina/KB-DS::Pattern"
       },
       {
-        "title": "Priority 5",
+        "title": "Priority 7",
         "prompt": "Run a controlled block this week combining `GettUpp::Infrastructure` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline.",
         "value": "GettUpp::Infrastructure + Miscellaneous::General: uplift +2.58"
-      },
-      {
-        "title": "Priority 6",
-        "prompt": "Run a controlled block this week combining `AI Arbitrage::Automation` then `Cristina/KB-DS::Truth`, and compare resulting composite score against your rolling 14-day baseline.",
-        "value": "AI Arbitrage::Automation + Cristina/KB-DS::Truth: uplift +1.06"
-      },
-      {
-        "title": "Priority 7",
-        "prompt": "Run a controlled block this week combining `AI Arbitrage::Integration` then `Cristina/KB-DS::Memory`, and compare resulting composite score against your rolling 14-day baseline.",
-        "value": "AI Arbitrage::Integration + Cristina/KB-DS::Memory: uplift +1.11"
       }
     ],
     "Gamechanging Connections": [
@@ -333,19 +333,9 @@
         "value": "Run a controlled block this week combining `GettUpp::Infrastructure` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline."
       },
       {
-        "title": "AI Arbitrage::Automation + Cristina/KB-DS::Truth: uplift +1.06",
-        "prompt": "Pair days average 5.77 vs 4.71 when absent. Estimated synergy vs strongest single signal: +0.24.",
-        "value": "Run a controlled block this week combining `AI Arbitrage::Automation` then `Cristina/KB-DS::Truth`, and compare resulting composite score against your rolling 14-day baseline."
-      },
-      {
-        "title": "AI Arbitrage::Integration + Cristina/KB-DS::Memory: uplift +1.11",
-        "prompt": "Pair days average 5.88 vs 4.77 when absent. Estimated synergy vs strongest single signal: +0.25.",
-        "value": "Run a controlled block this week combining `AI Arbitrage::Integration` then `Cristina/KB-DS::Memory`, and compare resulting composite score against your rolling 14-day baseline."
-      },
-      {
-        "title": "Cristina/KB-DS::Memory + Cristina/KB-DS::Truth: uplift +1.21",
-        "prompt": "Pair days average 5.95 vs 4.75 when absent. Estimated synergy vs strongest single signal: +0.32.",
-        "value": "Run a controlled block this week combining `Cristina/KB-DS::Memory` then `Cristina/KB-DS::Truth`, and compare resulting composite score against your rolling 14-day baseline."
+        "title": "GettUpp::Infrastructure + GettUpp::UI/UX: uplift +1.58",
+        "prompt": "Pair days average 5.12 vs 3.54 when absent. Estimated synergy vs strongest single signal: +0.00.",
+        "value": "Run a controlled block this week combining `GettUpp::Infrastructure` then `GettUpp::UI/UX`, and compare resulting composite score against your rolling 14-day baseline."
       }
     ]
   }

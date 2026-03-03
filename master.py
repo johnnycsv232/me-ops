@@ -13,7 +13,7 @@ import json
 import os
 import argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Tuple
 import duckdb
 from concurrent.futures import ThreadPoolExecutor, as_completed

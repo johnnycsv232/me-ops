@@ -1,0 +1,845 @@
+{
+  "generated_at": "2026-03-03T04:35:59.387323+00:00",
+  "memory_mode": "persistent",
+  "coverage": {
+    "events_count": 28013,
+    "active_days": 64,
+    "signal_count": 20
+  },
+  "summary": {
+    "insight_count": 12,
+    "new_count": 4,
+    "recurring_count": 8,
+    "high_impact_count": 7
+  },
+  "insights": [
+    {
+      "type": "signal_drift",
+      "title": "Signal drift detected: Miscellaneous::General",
+      "insight": "Miscellaneous::General dropped from 14469 hits in the prior 60-day window to 5012 in the last 30 days (65% decline).",
+      "evidence": {
+        "signal": "Miscellaneous::General",
+        "total_events": 19481,
+        "last_seen": "2026-02-19",
+        "recent_30": 5012,
+        "prior_60": 14469,
+        "decline_ratio": 0.65
+      },
+      "counter_evidence": [
+        "Decline can be intentional deprioritization; confirm against roadmap before reactivating."
+      ],
+      "next_action": "Decide explicitly: revive `Miscellaneous::General` this week or archive it to remove mental overhead.",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "evidence_key": "Miscellaneous::General",
+      "insight_key": "839ac2f3c8ec5e906343fa383a6144c1fb50a186",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "signal_drift",
+      "title": "Signal drift detected: IronClad::Content",
+      "insight": "IronClad::Content dropped from 169 hits in the prior 60-day window to 40 in the last 30 days (76% decline).",
+      "evidence": {
+        "signal": "IronClad::Content",
+        "total_events": 209,
+        "last_seen": "2026-02-19",
+        "recent_30": 40,
+        "prior_60": 169,
+        "decline_ratio": 0.76
+      },
+      "counter_evidence": [
+        "Decline can be intentional deprioritization; confirm against roadmap before reactivating."
+      ],
+      "next_action": "Decide explicitly: revive `IronClad::Content` this week or archive it to remove mental overhead.",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "evidence_key": "IronClad::Content",
+      "insight_key": "056d0621b80a74e580529f0f112b0c903ae478ec",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "signal_drift",
+      "title": "Signal drift detected: AI Arbitrage::Integration",
+      "insight": "AI Arbitrage::Integration dropped from 158 hits in the prior 60-day window to 38 in the last 30 days (76% decline).",
+      "evidence": {
+        "signal": "AI Arbitrage::Integration",
+        "total_events": 196,
+        "last_seen": "2026-02-19",
+        "recent_30": 38,
+        "prior_60": 158,
+        "decline_ratio": 0.76
+      },
+      "counter_evidence": [
+        "Decline can be intentional deprioritization; confirm against roadmap before reactivating."
+      ],
+      "next_action": "Decide explicitly: revive `AI Arbitrage::Integration` this week or archive it to remove mental overhead.",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "evidence_key": "AI Arbitrage::Integration",
+      "insight_key": "c1974fbda83d1d64d0264924aa121bc208f32022",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "signal_drift",
+      "title": "Signal drift detected: GettUpp::Marketing",
+      "insight": "GettUpp::Marketing dropped from 130 hits in the prior 60-day window to 27 in the last 30 days (79% decline).",
+      "evidence": {
+        "signal": "GettUpp::Marketing",
+        "total_events": 157,
+        "last_seen": "2026-02-19",
+        "recent_30": 27,
+        "prior_60": 130,
+        "decline_ratio": 0.79
+      },
+      "counter_evidence": [
+        "Decline can be intentional deprioritization; confirm against roadmap before reactivating."
+      ],
+      "next_action": "Decide explicitly: revive `GettUpp::Marketing` this week or archive it to remove mental overhead.",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "evidence_key": "GettUpp::Marketing",
+      "insight_key": "b92b3aab19b45175bf0e2d147d191ab358765d0b",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "signal_drift",
+      "title": "Signal drift detected: Cristina/KB-DS::Memory",
+      "insight": "Cristina/KB-DS::Memory dropped from 64 hits in the prior 60-day window to 15 in the last 30 days (77% decline).",
+      "evidence": {
+        "signal": "Cristina/KB-DS::Memory",
+        "total_events": 79,
+        "last_seen": "2026-02-19",
+        "recent_30": 15,
+        "prior_60": 64,
+        "decline_ratio": 0.77
+      },
+      "counter_evidence": [
+        "Decline can be intentional deprioritization; confirm against roadmap before reactivating."
+      ],
+      "next_action": "Decide explicitly: revive `Cristina/KB-DS::Memory` this week or archive it to remove mental overhead.",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "evidence_key": "Cristina/KB-DS::Memory",
+      "insight_key": "b71a603adfae61d46f37b58e817805652137c147",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "signal_drift",
+      "title": "Signal drift detected: Cristina/KB-DS::Pattern",
+      "insight": "Cristina/KB-DS::Pattern dropped from 29 hits in the prior 60-day window to 0 in the last 30 days (100% decline).",
+      "evidence": {
+        "signal": "Cristina/KB-DS::Pattern",
+        "total_events": 29,
+        "last_seen": "2026-01-27",
+        "recent_30": 0,
+        "prior_60": 29,
+        "decline_ratio": 1.0
+      },
+      "counter_evidence": [
+        "Decline can be intentional deprioritization; confirm against roadmap before reactivating."
+      ],
+      "next_action": "Decide explicitly: revive `Cristina/KB-DS::Pattern` this week or archive it to remove mental overhead.",
+      "impact_score": 5.9,
+      "confidence": 0.8,
+      "evidence_key": "Cristina/KB-DS::Pattern",
+      "insight_key": "868357d6609b63605f8a050ec979c280babf02c3",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "connection",
+      "title": "GettUpp::Infrastructure + Miscellaneous::General: uplift +2.58",
+      "insight": "Pair days average 5.08 vs 2.50 when absent. Estimated synergy vs strongest single signal: +0.00.",
+      "evidence": {
+        "signal_a": "GettUpp::Infrastructure",
+        "signal_b": "Miscellaneous::General",
+        "support_days": 61,
+        "recent_support_days": 16,
+        "recency_ratio": 0.26,
+        "avg_with_pair": 5.079,
+        "avg_without_pair": 2.5,
+        "avg_signal_a_present": 5.079,
+        "avg_signal_b_present": 4.997,
+        "uplift": 2.579,
+        "synergy": 0.0,
+        "low_with_pair_rate": 0.164,
+        "std_with_pair": 1.133,
+        "std_without_pair": 0.707,
+        "examples": {
+          "sample_events": [
+            {
+              "event_id": "769c9bce-616c-40dc-8c8f-d9707401fc52",
+              "day": "2026-02-19",
+              "action": "workstream_summary",
+              "target_excerpt": "summary:769c9bce-616c-40dc-8c8f-d9707401fc52"
+            },
+            {
+              "event_id": "827bc6a0-d90c-43aa-82a3-f409d8113f1f",
+              "day": "2026-02-19",
+              "action": "time_range",
+              "target_excerpt": "2026-02-19T23:32:01.302049Z \u2192 2026-02-19T23:52:01.29943Z"
+            },
+            {
+              "event_id": "ff69050c-d481-47c5-a7a2-72decffa1823",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How will the VPS installation impact OpenClaw security?"
+            },
+            {
+              "event_id": "78b4ff65-6eb2-4799-bdbb-2c02b7823d09",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Did the Python script zip structure meet expectations?"
+            },
+            {
+              "event_id": "afa16cb9-25cb-468c-bc97-c52cf72eb1c1",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How did Pieces MCP's stdio affect LTM extraction?"
+            },
+            {
+              "event_id": "51f54abb-031b-42f3-99d5-b0197681b551",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "http://localhost:39390/annotations"
+            },
+            {
+              "event_id": "10aa777d-8841-4b2a-b067-fb8cda894930",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "https://docs.pieces.app/prod/cli"
+            },
+            {
+              "event_id": "533658ec-102a-4a91-aad1-e84da3aefe0c",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "http://localhost:393/"
+            }
+          ],
+          "top_actions": [
+            {
+              "action": "web_visit",
+              "count": 12369
+            },
+            {
+              "action": "hint_suggested_query",
+              "count": 3680
+            },
+            {
+              "action": "time_range",
+              "count": 3356
+            },
+            {
+              "action": "activity",
+              "count": 2132
+            },
+            {
+              "action": "file_reference",
+              "count": 2090
+            }
+          ]
+        }
+      },
+      "counter_evidence": [
+        "One signal is Miscellaneous::General, so this may partly reflect unstructured work days.",
+        "Pattern is aging: less than 35% of observed pair days are in the last 30 days."
+      ],
+      "next_action": "Run a controlled block this week combining `GettUpp::Infrastructure` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline.",
+      "impact_score": 2.2,
+      "confidence": 0.9,
+      "evidence_key": "GettUpp::Infrastructure|Miscellaneous::General",
+      "insight_key": "60b40bd9aee26d848c512e1d644177b4b7cf9453",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "connection",
+      "title": "GettUpp::Infrastructure + GettUpp::UI/UX: uplift +1.58",
+      "insight": "Pair days average 5.12 vs 3.54 when absent. Estimated synergy vs strongest single signal: +0.00.",
+      "evidence": {
+        "signal_a": "GettUpp::Infrastructure",
+        "signal_b": "GettUpp::UI/UX",
+        "support_days": 58,
+        "recent_support_days": 16,
+        "recency_ratio": 0.28,
+        "avg_with_pair": 5.122,
+        "avg_without_pair": 3.54,
+        "avg_signal_a_present": 5.079,
+        "avg_signal_b_present": 5.122,
+        "uplift": 1.582,
+        "synergy": 0.0,
+        "low_with_pair_rate": 0.138,
+        "std_with_pair": 1.119,
+        "std_without_pair": 1.37,
+        "examples": {
+          "sample_events": [
+            {
+              "event_id": "769c9bce-616c-40dc-8c8f-d9707401fc52",
+              "day": "2026-02-19",
+              "action": "workstream_summary",
+              "target_excerpt": "summary:769c9bce-616c-40dc-8c8f-d9707401fc52"
+            },
+            {
+              "event_id": "afa16cb9-25cb-468c-bc97-c52cf72eb1c1",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How did Pieces MCP's stdio affect LTM extraction?"
+            },
+            {
+              "event_id": "38fb49e9-e6d9-49c8-80e8-baf803c8f26e",
+              "day": "2026-02-19",
+              "action": "annotation_summary",
+              "target_excerpt": "### Core Tasks & Projects\n- Generated a comprehensive \"IronClad \u2014 Single Source of Truth (SSOT)\" doc"
+            },
+            {
+              "event_id": "5657a726-9211-4d85-ba67-b7593dc4c0e3",
+              "day": "2026-02-19",
+              "action": "workstream_summary",
+              "target_excerpt": "summary:5657a726-9211-4d85-ba67-b7593dc4c0e3"
+            },
+            {
+              "event_id": "51a2c426-0a2d-4cc5-b1fb-f56dee464d66",
+              "day": "2026-02-19",
+              "action": "workstream_summary",
+              "target_excerpt": "summary:51a2c426-0a2d-4cc5-b1fb-f56dee464d66"
+            },
+            {
+              "event_id": "5649bd6b-068e-4128-b41a-2b0ffa4ba18a",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Define AI Cofounder OS database schemas."
+            },
+            {
+              "event_id": "686e0b2d-ad43-4b86-a064-437772b851d2",
+              "day": "2026-02-19",
+              "action": "annotation_summary",
+              "target_excerpt": "### Core Tasks & Projects\n*   **Pieces MCP Server Integration:** Debugged and verified the manual op"
+            },
+            {
+              "event_id": "9093c512-65e7-4c9c-8b9a-1ad10d9234f8",
+              "day": "2026-02-19",
+              "action": "workstream_summary",
+              "target_excerpt": "summary:9093c512-65e7-4c9c-8b9a-1ad10d9234f8"
+            }
+          ],
+          "top_actions": [
+            {
+              "action": "web_visit",
+              "count": 12265
+            },
+            {
+              "action": "hint_suggested_query",
+              "count": 3676
+            },
+            {
+              "action": "time_range",
+              "count": 3347
+            },
+            {
+              "action": "activity",
+              "count": 2103
+            },
+            {
+              "action": "file_reference",
+              "count": 2076
+            }
+          ]
+        }
+      },
+      "counter_evidence": [
+        "Pattern is aging: less than 35% of observed pair days are in the last 30 days."
+      ],
+      "next_action": "Run a controlled block this week combining `GettUpp::Infrastructure` then `GettUpp::UI/UX`, and compare resulting composite score against your rolling 14-day baseline.",
+      "impact_score": 1.64,
+      "confidence": 0.95,
+      "evidence_key": "GettUpp::Infrastructure|GettUpp::UI/UX",
+      "insight_key": "dfd4d0b7ae7a2479b9c92b54db24878b520adfb5",
+      "novelty": "recurring",
+      "previous_occurrences": 1
+    },
+    {
+      "type": "connection",
+      "title": "AI Arbitrage::Automation + Cristina/KB-DS::Truth: uplift +1.06",
+      "insight": "Pair days average 5.77 vs 4.71 when absent. Estimated synergy vs strongest single signal: +0.24.",
+      "evidence": {
+        "signal_a": "AI Arbitrage::Automation",
+        "signal_b": "Cristina/KB-DS::Truth",
+        "support_days": 17,
+        "recent_support_days": 10,
+        "recency_ratio": 0.59,
+        "avg_with_pair": 5.771,
+        "avg_without_pair": 4.711,
+        "avg_signal_a_present": 5.188,
+        "avg_signal_b_present": 5.533,
+        "uplift": 1.06,
+        "synergy": 0.24,
+        "low_with_pair_rate": 0.0,
+        "std_with_pair": 1.012,
+        "std_without_pair": 1.156,
+        "examples": {
+          "sample_events": [
+            {
+              "event_id": "0621bdaa-c5e6-4207-aab9-772c06aebb74",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Fix Twilio signature validation inconsistency?"
+            },
+            {
+              "event_id": "9936b2ad-6a68-4b98-be3c-b3bf01a8d50c",
+              "day": "2026-02-19",
+              "action": "annotation_summary",
+              "target_excerpt": "### Core Tasks & Projects\n- **Reviewed and refined the IronClad AI Founder Project strategy and proj"
+            },
+            {
+              "event_id": "b40d2e3f-3259-4c05-b48f-f424a797d21c",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "selected_messages#4-adopt-a-test-driven--proof-driven-validation-rdd-methodology"
+            },
+            {
+              "event_id": "8d279255-d3c7-407c-9812-63bfcfe08f10",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How did the AI Meeting Notes connection error impact workflow?"
+            },
+            {
+              "event_id": "af6955de-8a37-4e52-b62b-281a3c301f7a",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "https://www.notion.so/agent/selected_messages#4-adopt-a-test-driven--proof-driven-validation-rdd-met"
+            },
+            {
+              "event_id": "dc254824-996f-4db7-a407-823a29a10319",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How will Loom and Confluence aid task automation?"
+            },
+            {
+              "event_id": "7159878b-0694-47f5-a15e-4faad3b23ae3",
+              "day": "2026-02-19",
+              "action": "annotation_description",
+              "target_excerpt": "Initiated the setup of a new Slack workspace, \"IronClad Leads,\" and successfully integrated Notion A"
+            },
+            {
+              "event_id": "205e903e-7067-4e9e-a94e-e59f884726a5",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Did VIP notifications impact workflow?"
+            }
+          ],
+          "top_actions": [
+            {
+              "action": "web_visit",
+              "count": 4227
+            },
+            {
+              "action": "time_range",
+              "count": 2506
+            },
+            {
+              "action": "hint_suggested_query",
+              "count": 2411
+            },
+            {
+              "action": "file_reference",
+              "count": 1849
+            },
+            {
+              "action": "activity",
+              "count": 974
+            }
+          ]
+        }
+      },
+      "counter_evidence": [
+        "No major statistical red flags detected at current thresholds."
+      ],
+      "next_action": "Run a controlled block this week combining `AI Arbitrage::Automation` then `Cristina/KB-DS::Truth`, and compare resulting composite score against your rolling 14-day baseline.",
+      "impact_score": 1.52,
+      "confidence": 0.92,
+      "evidence_key": "AI Arbitrage::Automation|Cristina/KB-DS::Truth",
+      "insight_key": "a56750d291712701e9ddaccca6ddb514c1dee723",
+      "novelty": "new",
+      "previous_occurrences": 0
+    },
+    {
+      "type": "connection",
+      "title": "Cristina/KB-DS::Truth + IronClad::Sales: uplift +1.12",
+      "insight": "Pair days average 5.85 vs 4.73 when absent. Estimated synergy vs strongest single signal: +0.32.",
+      "evidence": {
+        "signal_a": "Cristina/KB-DS::Truth",
+        "signal_b": "IronClad::Sales",
+        "support_days": 15,
+        "recent_support_days": 8,
+        "recency_ratio": 0.53,
+        "avg_with_pair": 5.853,
+        "avg_without_pair": 4.729,
+        "avg_signal_a_present": 5.533,
+        "avg_signal_b_present": 5.135,
+        "uplift": 1.124,
+        "synergy": 0.32,
+        "low_with_pair_rate": 0.0,
+        "std_with_pair": 1.091,
+        "std_without_pair": 1.124,
+        "examples": {
+          "sample_events": [
+            {
+              "event_id": "0621bdaa-c5e6-4207-aab9-772c06aebb74",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Fix Twilio signature validation inconsistency?"
+            },
+            {
+              "event_id": "2eb76a0d-28f2-41b5-92e2-cf641c8e1d46",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "What's the next step for CRM handoff implementation?"
+            },
+            {
+              "event_id": "b7db5933-a005-46ca-9437-25dce5b030a3",
+              "day": "2026-02-19",
+              "action": "annotation_summary",
+              "target_excerpt": "### Core Tasks & Projects\n*   **Defining IronClad Project Strategy:** Reviewed a comprehensive strat"
+            },
+            {
+              "event_id": "f31c19f8-f9f8-4af9-b1ff-61a84c2e348c",
+              "day": "2026-02-19",
+              "action": "annotation_description",
+              "target_excerpt": "Finalized core architectural decisions for the IronClad revenue recovery engine, transitioning it to"
+            },
+            {
+              "event_id": "2b05f769-15f2-4974-bbc1-d80e3cfc57e1",
+              "day": "2026-02-19",
+              "action": "annotation_summary",
+              "target_excerpt": "### Core Tasks & Projects\n-   **Finalized IronClad V1 Design Decisions:** Confirmed and documented a"
+            },
+            {
+              "event_id": "9936b2ad-6a68-4b98-be3c-b3bf01a8d50c",
+              "day": "2026-02-19",
+              "action": "annotation_summary",
+              "target_excerpt": "### Core Tasks & Projects\n- **Reviewed and refined the IronClad AI Founder Project strategy and proj"
+            },
+            {
+              "event_id": "b40d2e3f-3259-4c05-b48f-f424a797d21c",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "selected_messages#4-adopt-a-test-driven--proof-driven-validation-rdd-methodology"
+            },
+            {
+              "event_id": "45b8c9db-4fc5-451a-a38d-4684d99b8eab",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How will HubSpot MCP aid sales context?"
+            }
+          ],
+          "top_actions": [
+            {
+              "action": "web_visit",
+              "count": 4225
+            },
+            {
+              "action": "time_range",
+              "count": 2502
+            },
+            {
+              "action": "hint_suggested_query",
+              "count": 2233
+            },
+            {
+              "action": "file_reference",
+              "count": 1881
+            },
+            {
+              "action": "activity",
+              "count": 1748
+            }
+          ]
+        }
+      },
+      "counter_evidence": [
+        "No major statistical red flags detected at current thresholds."
+      ],
+      "next_action": "Run a controlled block this week combining `Cristina/KB-DS::Truth` then `IronClad::Sales`, and compare resulting composite score against your rolling 14-day baseline.",
+      "impact_score": 1.43,
+      "confidence": 0.91,
+      "evidence_key": "Cristina/KB-DS::Truth|IronClad::Sales",
+      "insight_key": "13a43ea29aed3845feafaf5428d80dd66411b8e6",
+      "novelty": "new",
+      "previous_occurrences": 0
+    },
+    {
+      "type": "connection",
+      "title": "GettUpp::UI/UX + Miscellaneous::General: uplift +1.58",
+      "insight": "Pair days average 5.12 vs 3.54 when absent. Estimated synergy vs strongest single signal: +0.00.",
+      "evidence": {
+        "signal_a": "GettUpp::UI/UX",
+        "signal_b": "Miscellaneous::General",
+        "support_days": 58,
+        "recent_support_days": 16,
+        "recency_ratio": 0.28,
+        "avg_with_pair": 5.122,
+        "avg_without_pair": 3.54,
+        "avg_signal_a_present": 5.122,
+        "avg_signal_b_present": 4.997,
+        "uplift": 1.582,
+        "synergy": 0.0,
+        "low_with_pair_rate": 0.138,
+        "std_with_pair": 1.119,
+        "std_without_pair": 1.37,
+        "examples": {
+          "sample_events": [
+            {
+              "event_id": "827bc6a0-d90c-43aa-82a3-f409d8113f1f",
+              "day": "2026-02-19",
+              "action": "time_range",
+              "target_excerpt": "2026-02-19T23:32:01.302049Z \u2192 2026-02-19T23:52:01.29943Z"
+            },
+            {
+              "event_id": "ff69050c-d481-47c5-a7a2-72decffa1823",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "How will the VPS installation impact OpenClaw security?"
+            },
+            {
+              "event_id": "78b4ff65-6eb2-4799-bdbb-2c02b7823d09",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Did the Python script zip structure meet expectations?"
+            },
+            {
+              "event_id": "51f54abb-031b-42f3-99d5-b0197681b551",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "http://localhost:39390/annotations"
+            },
+            {
+              "event_id": "10aa777d-8841-4b2a-b067-fb8cda894930",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "https://docs.pieces.app/prod/cli"
+            },
+            {
+              "event_id": "533658ec-102a-4a91-aad1-e84da3aefe0c",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "http://localhost:393/"
+            },
+            {
+              "event_id": "49ef5be7-9a40-44d2-b515-1feb86f06b0a",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "http://localhost:39398/websites"
+            },
+            {
+              "event_id": "1631f274-7cdf-4962-8318-307e0371275f",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "http://localhost:39300/conversations"
+            }
+          ],
+          "top_actions": [
+            {
+              "action": "web_visit",
+              "count": 12265
+            },
+            {
+              "action": "hint_suggested_query",
+              "count": 3676
+            },
+            {
+              "action": "time_range",
+              "count": 3347
+            },
+            {
+              "action": "activity",
+              "count": 2103
+            },
+            {
+              "action": "file_reference",
+              "count": 2076
+            }
+          ]
+        }
+      },
+      "counter_evidence": [
+        "One signal is Miscellaneous::General, so this may partly reflect unstructured work days.",
+        "Pattern is aging: less than 35% of observed pair days are in the last 30 days."
+      ],
+      "next_action": "Run a controlled block this week combining `GettUpp::UI/UX` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline.",
+      "impact_score": 1.39,
+      "confidence": 0.92,
+      "evidence_key": "GettUpp::UI/UX|Miscellaneous::General",
+      "insight_key": "aebc27fc4340a862d7cd44e15cb5e93697786ba8",
+      "novelty": "new",
+      "previous_occurrences": 0
+    },
+    {
+      "type": "connection",
+      "title": "AI Arbitrage::Integration + Cristina/KB-DS::Memory: uplift +1.11",
+      "insight": "Pair days average 5.88 vs 4.77 when absent. Estimated synergy vs strongest single signal: +0.25.",
+      "evidence": {
+        "signal_a": "AI Arbitrage::Integration",
+        "signal_b": "Cristina/KB-DS::Memory",
+        "support_days": 13,
+        "recent_support_days": 7,
+        "recency_ratio": 0.54,
+        "avg_with_pair": 5.877,
+        "avg_without_pair": 4.768,
+        "avg_signal_a_present": 5.15,
+        "avg_signal_b_present": 5.63,
+        "uplift": 1.109,
+        "synergy": 0.25,
+        "low_with_pair_rate": 0.0,
+        "std_with_pair": 1.145,
+        "std_without_pair": 1.125,
+        "examples": {
+          "sample_events": [
+            {
+              "event_id": "f9b49bc4-c35a-48e6-80b9-4326fe638714",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Were Minimax Agent's LTM queries successful?"
+            },
+            {
+              "event_id": "9288d7bd-d442-41c1-9904-5c053a0258f1",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "https://joshiestephanie.atlassian.net/plugins/servlet/ac/jira-slack-integration/slack-config-page?bo"
+            },
+            {
+              "event_id": "b697c254-3956-46c8-9524-8d1c7fab6675",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Why did the Codex extension crash in Antigravity?"
+            },
+            {
+              "event_id": "87b96a66-7043-483a-9791-d3fc825f342d",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "What's the strategy for AI Co-founder OS memory?"
+            },
+            {
+              "event_id": "2768b218-39d8-4740-b015-21788c0d6e5c",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "What was the biggest challenge in integrating Ragie.ai connectors?"
+            },
+            {
+              "event_id": "3ee7849d-ea48-4518-80a2-496976644cac",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "https://secure.ragie.ai/connectors/config/google_drive?credentialld"
+            },
+            {
+              "event_id": "618b7b64-3627-4e6d-9ab7-3d36247e9275",
+              "day": "2026-02-19",
+              "action": "web_visit",
+              "target_excerpt": "https://secure.ragie.ai/connectors"
+            },
+            {
+              "event_id": "079e57d7-831b-4e25-9b49-452d42fe6513",
+              "day": "2026-02-19",
+              "action": "hint_suggested_query",
+              "target_excerpt": "Why did Slack AI Connector fail authorization?"
+            }
+          ],
+          "top_actions": [
+            {
+              "action": "web_visit",
+              "count": 4106
+            },
+            {
+              "action": "time_range",
+              "count": 2209
+            },
+            {
+              "action": "file_reference",
+              "count": 1848
+            },
+            {
+              "action": "hint_suggested_query",
+              "count": 1806
+            },
+            {
+              "action": "activity",
+              "count": 974
+            }
+          ]
+        }
+      },
+      "counter_evidence": [
+        "No major statistical red flags detected at current thresholds."
+      ],
+      "next_action": "Run a controlled block this week combining `AI Arbitrage::Integration` then `Cristina/KB-DS::Memory`, and compare resulting composite score against your rolling 14-day baseline.",
+      "impact_score": 1.39,
+      "confidence": 0.86,
+      "evidence_key": "AI Arbitrage::Integration|Cristina/KB-DS::Memory",
+      "insight_key": "d61698252cab0904e6db2612c940ad5128da78e2",
+      "novelty": "new",
+      "previous_occurrences": 0
+    }
+  ],
+  "action_queue": [
+    {
+      "priority": 1,
+      "action": "Decide explicitly: revive `Miscellaneous::General` this week or archive it to remove mental overhead.",
+      "source_title": "Signal drift detected: Miscellaneous::General",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "novelty": "recurring"
+    },
+    {
+      "priority": 2,
+      "action": "Decide explicitly: revive `IronClad::Content` this week or archive it to remove mental overhead.",
+      "source_title": "Signal drift detected: IronClad::Content",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "novelty": "recurring"
+    },
+    {
+      "priority": 3,
+      "action": "Decide explicitly: revive `AI Arbitrage::Integration` this week or archive it to remove mental overhead.",
+      "source_title": "Signal drift detected: AI Arbitrage::Integration",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "novelty": "recurring"
+    },
+    {
+      "priority": 4,
+      "action": "Decide explicitly: revive `GettUpp::Marketing` this week or archive it to remove mental overhead.",
+      "source_title": "Signal drift detected: GettUpp::Marketing",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "novelty": "recurring"
+    },
+    {
+      "priority": 5,
+      "action": "Decide explicitly: revive `Cristina/KB-DS::Memory` this week or archive it to remove mental overhead.",
+      "source_title": "Signal drift detected: Cristina/KB-DS::Memory",
+      "impact_score": 8.0,
+      "confidence": 0.8,
+      "novelty": "recurring"
+    },
+    {
+      "priority": 6,
+      "action": "Decide explicitly: revive `Cristina/KB-DS::Pattern` this week or archive it to remove mental overhead.",
+      "source_title": "Signal drift detected: Cristina/KB-DS::Pattern",
+      "impact_score": 5.9,
+      "confidence": 0.8,
+      "novelty": "recurring"
+    },
+    {
+      "priority": 7,
+      "action": "Run a controlled block this week combining `GettUpp::Infrastructure` then `Miscellaneous::General`, and compare resulting composite score against your rolling 14-day baseline.",
+      "source_title": "GettUpp::Infrastructure + Miscellaneous::General: uplift +2.58",
+      "impact_score": 2.2,
+      "confidence": 0.9,
+      "novelty": "recurring"
+    }
+  ]
+}

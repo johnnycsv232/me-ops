@@ -50,6 +50,14 @@ CREATE TABLE IF NOT EXISTS workflow_patterns (
     avg_duration_min DOUBLE,
     example_session INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS context_switches (
+    event_id        VARCHAR PRIMARY KEY,
+    session_id      INTEGER,
+    from_project    VARCHAR,
+    to_project      VARCHAR,
+    ts              TIMESTAMP NOT NULL
+);
 """
 
 
@@ -146,6 +154,31 @@ def mine_patterns(sessions: list[dict], window: int = 3) -> list[tuple]:
         for seq, count in ngrams.most_common(50)
         if count >= 3
     ]
+
+
+def detect_context_switches(
+    sessions: list[dict], event_projects: dict[str, set[str]]
+) -> list[list[object]]:
+    """Detect when project context changes within a session."""
+    switch_rows: list[list[object]] = []
+    for sid, sess in enumerate(sessions):
+        events = sess["events"]
+        last_project = None
+
+        for event in events:
+            event_id, ts, _ = event
+            projects = event_projects.get(event_id, set())
+
+            # For simplicity, pick the first project if multiple exist
+            current_project = sorted(list(projects))[0] if projects else None
+
+            if current_project and last_project and current_project != last_project:
+                switch_rows.append([event_id, sid, last_project, current_project, ts])
+
+            if current_project:
+                last_project = current_project
+
+    return switch_rows
 
 
 def _event_projects_map(con: duckdb.DuckDBPyConnection) -> dict[str, set[str]]:
@@ -253,6 +286,18 @@ def run(
                     pattern_rows,
                 )
             print(f"    → {len(patterns)} recurring patterns found")
+
+            # 4. Context switches
+            print("  Detecting context switches...")
+            switch_rows = detect_context_switches(sessions, event_projects)
+            con.execute("DELETE FROM context_switches")
+            if switch_rows:
+                con.executemany(
+                    "INSERT INTO context_switches VALUES (?,?,?,?,?)",
+                    switch_rows,
+                )
+            print(f"    → {len(switch_rows)} project switches detected")
+
             con.execute("COMMIT")
         except Exception:
             con.execute("ROLLBACK")

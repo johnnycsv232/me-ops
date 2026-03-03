@@ -1,6 +1,6 @@
 # WORKFLOW DNA REPORT
 
-*Generated: 2026-02-22 07:04 CST*
+*Generated: 2026-03-02 22:36 CST*
 
 ## Coverage
 
@@ -20,25 +20,25 @@
 
 | Marker | Transition | Frequency | Days | Avg Gap (s) | Strength |
 | :--- | :--- | ---: | ---: | ---: | ---: |
-| Evidence Compression | `framing -> synthesis` | 1234 | 52 | 1.2 | 0.925 |
-| Constraint Framing | `query -> framing` | 639 | 29 | 22.9 | 0.678 |
-| Synthesis to Web Relay | `synthesis -> web` | 729 | 49 | 1733.9 | 0.57 |
-| Query to Activity Relay | `query -> activity` | 251 | 12 | 5.0 | 0.497 |
-| Github to Web Relay | `github -> web` | 217 | 42 | 73.7 | 0.494 |
-| Activity to Query Relay | `activity -> query` | 270 | 21 | 188.7 | 0.487 |
-| Local_Web to Web Relay | `local_web -> web` | 153 | 39 | 120.7 | 0.457 |
+| Evidence Compression | `framing -> synthesis` | 1232 | 52 | 1.2 | 0.925 |
+| Constraint Framing | `query -> framing` | 639 | 29 | 22.9 | 0.679 |
+| Synthesis to Web Relay | `synthesis -> web` | 728 | 49 | 1736.3 | 0.57 |
+| Query to Activity Relay | `query -> activity` | 250 | 12 | 5.1 | 0.497 |
+| Github to Web Relay | `github -> web` | 217 | 42 | 73.7 | 0.495 |
+| Activity to Query Relay | `activity -> query` | 271 | 21 | 188.0 | 0.488 |
+| Local_Web to Web Relay | `local_web -> web` | 153 | 39 | 119.5 | 0.457 |
 | Synthesis to Conversation Relay | `synthesis -> conversation` | 107 | 24 | 59.4 | 0.454 |
 
 ## Web Destination Breakdown
 
 Exact destinations behind high-signal transitions that end on web/local_web.
 
-### Synthesis to Web Relay (`synthesis -> web` | 729 hops)
+### Synthesis to Web Relay (`synthesis -> web` | 728 hops)
 
 | Destination | Hits | Share | Intent | Next Step | Avg Next Gap (s) | Example Target |
 | :--- | ---: | ---: | :--- | :--- | ---: | :--- |
 | unknown | 80 | 11.0% | unstructured_target | web_visit (web) | 424.1 | `@. @DOCS @DOCS @GettUppent Status Audit @GettUpp OS Production Audit` |
-| google.com | 32 | 4.4% | search | web_visit (web) | 152.4 | `https://google.com/search?gs_ssp=eJzj4tTP1Tcwy8ioNDBg9OLKLEvMU0gpSkzPBwBPcAce&q=ivan+drago&oq=ivan+dr&gs_lcrp=EgZjaHJ...` |
+| google.com | 31 | 4.3% | search | web_visit (web) | 157.3 | `https://google.com/search?gs_ssp=eJzj4tTP1Tcwy8ioNDBg9OLKLEvMU0gpSkzPBwBPcAce&q=ivan+drago&oq=ivan+dr&gs_lcrp=EgZjaHJ...` |
 | aistudio.google.com | 27 | 3.7% | page_visit | web_visit (web) | 237.3 | `https://aistudio.google.com/prompts/1UqZTiF52aYU5ombjz59CQ4ijE83CnWtI` |
 | gemini.google.com | 20 | 2.7% | page_visit | web_visit (web) | 169.0 | `https://gemini.google.com/app/0af436064141f2da#4f5a97e2a2dba7ff` |
 | notebooklm.google.com | 17 | 2.3% | page_visit | web_visit (web) | 3038.2 | `https://notebooklm.google.com/?icid=home_maincta` |
@@ -100,7 +100,7 @@ Concrete activity context for each active problem: where it happens and what you
 | :--- | ---: | ---: | :--- | :--- | ---: | :--- | :--- |
 | unknown | 1024 | 11.2% | unstructured_target | web_visit (web) | 248.6 | n/a | `youtube.com` |
 | google | 789 | 8.6% | unstructured_target | web_visit (web) | 62.4 | n/a | `aistudio.google.com` |
-| accounts.google.com | 326 | 3.6% | auth_flow | web_visit (web) | 43.8 | n/a | `https://accounts.google.com/v3/signin/accountchooser?client_id=468316177930-dkmnhti8obocc4r8o11vn478j9qqdglt.apps.goo...` |
+| accounts.google.com | 326 | 3.6% | auth_flow | web_visit (web) | 43.3 | n/a | `https://accounts.google.com/v3/signin/accountchooser?client_id=468316177930-dkmnhti8obocc4r8o11vn478j9qqdglt.apps.goo...` |
 | google.com | 266 | 2.9% | search | web_visit (web) | 314.1 | n/a | `https://google.com/chrome/?brand=GGRF&utm_source=google.com&utm_medium=material-callout&utm_campaign=cws&utm_keyword=...` |
 | youtube.com | 174 | 1.9% | video_review | web_visit (web) | 390.0 | n/a | `https://youtube.com/` |
 | console.cloud.google.com | 165 | 1.8% | page_visit | web_visit (web) | 17.0 | n/a | `https://console.cloud.google.com/security/recaptcha?authuser=1&project=gettuppent-production&hl=en-US` |

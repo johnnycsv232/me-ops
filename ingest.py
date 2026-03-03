@@ -16,7 +16,7 @@ import argparse
 import hashlib
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from time_utils import local_now, local_date, LOCAL_TZ
 from pathlib import Path
 from typing import Any
@@ -594,7 +594,7 @@ def ingest_tags_links(con: duckdb.DuckDBPyConnection, records: list[dict[str, An
         tag_text = rec.get("text", "")
         if not tag_id or not isinstance(tag_id, str):
             continue
-            
+
         ws_events = rec.get("workstream_events", {}).get("indices", {})
         for ws_event_id in ws_events:
             batch.append((ws_event_id, tag_id, str(tag_text)))
@@ -662,7 +662,7 @@ def mine_projects(con: duckdb.DuckDBPyConnection):
 def mine_subcategories(con: duckdb.DuckDBPyConnection) -> None:
     """Assign theme/subcategory to all events based on taxonomy.
 
-    Extracts all events from the DB, runs them through the categorization 
+    Extracts all events from the DB, runs them through the categorization
     logic in taxonomy.py, and persists the results in event_subcategories.
 
     Args:

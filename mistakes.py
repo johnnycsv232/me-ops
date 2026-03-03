@@ -150,8 +150,8 @@ def detect_failure_patterns(con: duckdb.DuckDBPyConnection) -> int:
 
     if patterns:
         con.executemany(
-            "INSERT INTO failure_patterns VALUES (?,?,?,?,?,?)",
-            patterns,
+            "INSERT INTO failure_patterns (pattern_type, description, evidence_count, severity, last_detected) VALUES (?,?,?,?,CURRENT_TIMESTAMP)",
+            [(p[1], p[2], p[3], p[4]) for p in patterns],
         )
     return len(patterns)
 

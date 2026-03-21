@@ -23,6 +23,10 @@ me_ops/                  # Project root (git repo)
 
 JSON exports stored in the `data/` directory.
 
+## v2 Direction
+
+The next architecture target is a **Personal Causal Intelligence System** built from a canonical ledger, case-based reasoning, and operator briefings. See `docs/ME_OPS_V2_ARCHITECTURE.md` for the v2 spec and implementation roadmap.
+
 ## Quick Start
 
 ```bash

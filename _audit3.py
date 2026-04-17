@@ -1,7 +1,7 @@
 import sys, pathlib, re
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 
-root = pathlib.Path(r'C:\Users\finan\me-ops')
+root = pathlib.Path(r'/home/finan/dev/me-ops')
 
 print("=== HARDCODED API KEYS / SECRETS SCAN ===")
 key_pattern = re.compile(r'AIza[A-Za-z0-9_\-]{35}')
@@ -68,7 +68,7 @@ print(f"  {len(triggers)} trigger phrases found in first 2000 chars")
 
 print("\n=== DB: NULL project_id check ===")
 import sqlite3
-conn = sqlite3.connect(r'C:\Users\finan\me-ops\meops.db')
+conn = sqlite3.connect(r'/home/finan/dev/me-ops\meops.db')
 conn.row_factory = sqlite3.Row
 r = conn.execute("SELECT COUNT(*) FROM entities WHERE project_id IS NULL").fetchone()
 print(f"  entities with NULL project_id: {r[0]}")

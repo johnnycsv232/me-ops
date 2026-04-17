@@ -1,5 +1,5 @@
 import sys, os, sqlite3, json, struct
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 
 print("=== PYTHON ===")
 print("version:", sys.version)
@@ -12,7 +12,7 @@ for k in ['GEMINI_API_KEY','MEOPS_DB','PYTHONIOENCODING']:
     print(f"  {k} = {v[:20]}..." if len(v) > 20 else f"  {k} = {v}")
 
 print("\n=== DB ===")
-db = r'C:\Users\finan\me-ops\meops.db'
+db = r'/home/finan/dev/me-ops\meops.db'
 print("exists:", os.path.exists(db))
 print("size:", os.path.getsize(db), "bytes")
 

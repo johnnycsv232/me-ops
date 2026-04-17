@@ -2,7 +2,7 @@
 Probe actual MCP batch_snapshot response to find where the TLDR text lives.
 """
 import sys, os, json, time
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 from core.config import load_project_env
 load_project_env()

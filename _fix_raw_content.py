@@ -5,7 +5,7 @@ then re-classifies, re-extracts decisions + failures, and updates the DB.
 No Gemini re-embedding needed — embeddings already include the name which is in summary.
 """
 import sys, os, json, hashlib
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 from core.config import load_project_env
 load_project_env()

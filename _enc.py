@@ -1,3 +1,3 @@
 import sys
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 print("encoding:", sys.stdout.encoding)

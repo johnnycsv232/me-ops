@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 from core.config import load_project_env
 load_project_env()
@@ -40,7 +40,7 @@ print("\n=== CURRENT test results ===")
 import subprocess
 r = subprocess.run(['python', '-m', 'unittest', 'discover', '-s', 'tests'],
                    capture_output=True, text=True,
-                   cwd=r'C:\Users\finan\me-ops')
+                   cwd=r'/home/finan/dev/me-ops')
 print(r.stdout or r.stderr)
 
 conn.close()

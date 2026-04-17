@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 from core.storage.db import get_conn
 

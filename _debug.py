@@ -1,5 +1,5 @@
 import sys, json
-sys.path.insert(0, r'C:\Users\finan\me-ops')
+sys.path.insert(0, r'/home/finan/dev/me-ops')
 from core.storage.db import get_conn
 conn = get_conn()
 

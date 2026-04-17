@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-03-22T04:18:21Z",
+  "machine": "GettUppENT",
+  "user": "finan",
+  "summary": {
+    "pass": 12,
+    "fail": 0,
+    "error": 0
+  },
+  "results": {
+    "same_machine_db_init": {
+      "status": "PASS",
+      "detail": "entities=561, DB at C:\\Users\\finan\\me-ops\\meops.db"
+    },
+    "same_machine_imports": {
+      "status": "PASS",
+      "detail": "all 5 core modules import cleanly"
+    },
+    "same_machine_recall": {
+      "status": "PASS",
+      "detail": "top result sim=0.7685"
+    },
+    "fresh_machine_requirements": {
+      "status": "PASS",
+      "detail": "missing from requirements.txt: none"
+    },
+    "fresh_machine_env_fallback": {
+      "status": "PASS",
+      "detail": "source key leaks=none, .env.example=True"
+    },
+    "fresh_machine_db_path": {
+      "status": "PASS",
+      "detail": "DB path=C:\\Users\\finan\\me-ops\\meops.db exists=True"
+    },
+    "offline_tfidf_fallback": {
+      "status": "PASS",
+      "detail": "TF-IDF index has 53 docs, recall returns 0 results"
+    },
+    "offline_db_readonly": {
+      "status": "PASS",
+      "detail": "DB reads fine offline, 561 entities available"
+    },
+    "offline_cache_reingest": {
+      "status": "PASS",
+      "detail": "Cache re-classify path works offline (0 unprocessed in cache)"
+    },
+    "degraded_gemini_recall_fallback": {
+      "status": "PASS",
+      "detail": "Fallback returned 2 results (TF-IDF mode)"
+    },
+    "degraded_no_piecesos_read_ops": {
+      "status": "PASS",
+      "detail": "PiecesOS=running \u2014 stats/recall/brief still work from DB alone (embeddings=579)"
+    },
+    "degraded_no_piecesos_ingest_graceful": {
+      "status": "PASS",
+      "detail": "PiecesOS running \u2014 skip graceful-failure test"
+    }
+  }
+}

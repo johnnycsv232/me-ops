@@ -1,0 +1,418 @@
+{
+  "generated": "2026-03-22T04:18:09Z",
+  "machine": "GettUppENT",
+  "user": "finan",
+  "project_root": "C:\\Users\\finan\\me-ops",
+  "db_path": "C:\\Users\\finan\\me-ops\\meops.db",
+  "entry_points": {
+    "primary": "run_phase2.py",
+    "legacy": "run.py",
+    "note": "Always use run_phase2.py \u2014 run.py is Phase 1 only"
+  },
+  "files": {
+    "run_phase2.py": {
+      "status": "PRIMARY",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 7245,
+      "lines": 176,
+      "hash_md5_8": "2b5c605e",
+      "notes": "All production CLI commands. Uses env-backed config and skips embedding if GEMINI_API_KEY is missing."
+    },
+    "run.py": {
+      "status": "SUPERSEDED",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 3414,
+      "lines": 107,
+      "hash_md5_8": "45701f78",
+      "notes": "Phase 1 only. Lacks Phase 2+ logic. Prefer run_phase2.py."
+    },
+    "requirements.txt": {
+      "status": "CURRENT",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 82,
+      "lines": 0,
+      "hash_md5_8": "dbde206d",
+      "notes": "Bootstrap scripts install from this file. Includes google-genai, numpy, pydantic, websockets, and python-dotenv."
+    },
+    "meops.db": {
+      "status": "PRECIOUS",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 2174976,
+      "lines": 0,
+      "hash_md5_8": "783d4a17",
+      "notes": "2.07 MB SQLite. Single source of all canonical data. Back up before any schema change."
+    },
+    "_reset_canonical.py": {
+      "status": "DANGEROUS",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 1190,
+      "lines": 30,
+      "hash_md5_8": "d2b00368",
+      "notes": "DESTRUCTIVE \u2014 wipes all derived layers. Now requires typing DESTROY before proceeding."
+    },
+    "_test_embed.py": {
+      "status": "HEALTH_CHECK",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 574,
+      "lines": 19,
+      "hash_md5_8": "f08e7b5e",
+      "notes": "Verifies Gemini API + model using GEMINI_API_KEY from env/.env."
+    },
+    "_boot_verdict.py": {
+      "status": "SCRATCH",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 7157,
+      "lines": 171,
+      "hash_md5_8": "1fa4d201",
+      "notes": "Audit script. Can delete after handoff."
+    },
+    "_debug.py": {
+      "status": "SCRATCH",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "NONE",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 1080,
+      "lines": 23,
+      "hash_md5_8": "ab30884f",
+      "notes": "One-off diagnostic. Delete."
+    },
+    "_enc.py": {
+      "status": "SCRATCH",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "NONE",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 96,
+      "lines": 3,
+      "hash_md5_8": "685858f0",
+      "notes": "Encoding test. Delete."
+    },
+    "_migrate.py": {
+      "status": "COMPLETED",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "NONE",
+      "owner_module": "root",
+      "exists": true,
+      "size_bytes": 1220,
+      "lines": 33,
+      "hash_md5_8": "4111c7c0",
+      "notes": "Ran ALTER TABLE once. Column now in SCHEMA_SQL. Can delete."
+    },
+    "core/storage/schema.py": {
+      "status": "LOAD_BEARING",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "storage",
+      "exists": true,
+      "size_bytes": 9722,
+      "lines": 230,
+      "hash_md5_8": "30837536",
+      "notes": "Full SQLite DDL. Source of truth. Schema changes require migration + potential data wipe."
+    },
+    "core/storage/db.py": {
+      "status": "LOAD_BEARING",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "storage",
+      "exists": true,
+      "size_bytes": 4834,
+      "lines": 127,
+      "hash_md5_8": "61304c25",
+      "notes": "get_conn(), init_db(), EntityRepo.upsert(), ensure_project(). All ingestion flows through here."
+    },
+    "core/ledger/classify.py": {
+      "status": "HIGH_IMPACT",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "ledger",
+      "exists": true,
+      "size_bytes": 9275,
+      "lines": 192,
+      "hash_md5_8": "d5bfe531",
+      "notes": "Maps text -> project_id (12 buckets) + event_kind. 311/526 events return NULL. Safe to add keywords."
+    },
+    "core/ledger/sessionize.py": {
+      "status": "ACTIVE",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "ledger",
+      "exists": true,
+      "size_bytes": 4023,
+      "lines": 120,
+      "hash_md5_8": "70439dbb",
+      "notes": "Groups events into sessions by 30-min gap/4-hr max. tool_switch_count is distinct tools, not real switches."
+    },
+    "core/cases/failure_chain.py": {
+      "status": "ACTIVE",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "cases",
+      "exists": true,
+      "size_bytes": 7671,
+      "lines": 163,
+      "hash_md5_8": "181ff63e",
+      "notes": "lift_failures_and_outcomes() + build_failure_chains(). 26 failures, 9 outcomes, 9 chains from 526 events."
+    },
+    "core/cases/win_signature.py": {
+      "status": "ACTIVE",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "cases",
+      "exists": true,
+      "size_bytes": 5150,
+      "lines": 130,
+      "hash_md5_8": "5581472d",
+      "notes": "build_win_signatures(). 9 win sigs from outcomes. Uses sqlite3.Row['key'] not .get()."
+    },
+    "core/cases/decision_replay.py": {
+      "status": "BROKEN_0OUT",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "cases",
+      "exists": true,
+      "size_bytes": 5479,
+      "lines": 151,
+      "hash_md5_8": "5c253ba6",
+      "notes": "extract_decisions() returns 0 from 526 events. Trigger phrases wrong for summary language."
+    },
+    "core/recall/gemini_embed.py": {
+      "status": "PHASE3_CORE",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "recall",
+      "exists": true,
+      "size_bytes": 13462,
+      "lines": 363,
+      "hash_md5_8": "137a00d0",
+      "notes": "Gemini embed pipeline. Reads GEMINI_API_KEY from env/.env, supports TF-IDF fallback, and keeps batch 50 / 65s pacing."
+    },
+    "core/recall/retrieve.py": {
+      "status": "ACTIVE",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "recall",
+      "exists": true,
+      "size_bytes": 9823,
+      "lines": 257,
+      "hash_md5_8": "8fcbf18c",
+      "notes": "TF-IDF fallback. 53 docs indexed. Returns 0 results \u2014 low doc count in index."
+    },
+    "core/heuristics/seed.py": {
+      "status": "ACTIVE",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "heuristics",
+      "exists": true,
+      "size_bytes": 6250,
+      "lines": 157,
+      "hash_md5_8": "e339836a",
+      "notes": "10 manually seeded heuristics. Idempotent (INSERT OR IGNORE). Safe to add more."
+    },
+    "core/briefing/daily.py": {
+      "status": "ACTIVE",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "briefing",
+      "exists": true,
+      "size_bytes": 7965,
+      "lines": 217,
+      "hash_md5_8": "8452b004",
+      "notes": "3 briefing templates. Hardcoded narrative, not ML-derived. DB stat injection works."
+    },
+    "core/operator/collapse_detector.py": {
+      "status": "ACTIVE_0OUT",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "operator",
+      "exists": true,
+      "size_bytes": 4288,
+      "lines": 111,
+      "hash_md5_8": "8111b227",
+      "notes": "Scans sessions but produces 0 alerts. tool_switch_count always 0-1, threshold is 4."
+    },
+    "core/models/base.py": {
+      "status": "DOC_ONLY",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "models",
+      "exists": true,
+      "size_bytes": 1631,
+      "lines": 61,
+      "hash_md5_8": "8ff902a7",
+      "notes": "Pydantic BaseRecord. NOT validated on DB writes. Reference only."
+    },
+    "core/models/event.py": {
+      "status": "DOC_ONLY",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "models",
+      "exists": true,
+      "size_bytes": 3172,
+      "lines": 113,
+      "hash_md5_8": "ec6e25e8",
+      "notes": "Event, Artifact, SystemState. Reference only."
+    },
+    "core/models/decision.py": {
+      "status": "DOC_ONLY",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "models",
+      "exists": true,
+      "size_bytes": 3167,
+      "lines": 120,
+      "hash_md5_8": "e256931c",
+      "notes": "Decision (with quality scoring formula), Failure, Outcome. Reference only."
+    },
+    "core/models/case.py": {
+      "status": "DOC_ONLY",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "models",
+      "exists": true,
+      "size_bytes": 2941,
+      "lines": 100,
+      "hash_md5_8": "7fe611ce",
+      "notes": "Case, Heuristic, Briefing, Intervention. Reference only."
+    },
+    "core/causal/__init__.py": {
+      "status": "EMPTY_STUB",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "NONE",
+      "owner_module": "causal",
+      "exists": true,
+      "size_bytes": 0,
+      "lines": 0,
+      "hash_md5_8": "d41d8cd9",
+      "notes": "Phase 4 causal inference. Not started."
+    },
+    "pipelines/__init__.py": {
+      "status": "EMPTY_STUB",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "NONE",
+      "owner_module": "pipelines",
+      "exists": true,
+      "size_bytes": 0,
+      "lines": 0,
+      "hash_md5_8": "d41d8cd9",
+      "notes": "Standalone pipeline scripts. Not built."
+    },
+    "pieces_bridge/ingest.py": {
+      "status": "DEPRECATED",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "pieces_bridge",
+      "exists": true,
+      "size_bytes": 1476,
+      "lines": 46,
+      "hash_md5_8": "9587c0ab",
+      "notes": "Deprecated compatibility shim that redirects legacy callers to ingest_p2."
+    },
+    "pieces_bridge/ingest_p2.py": {
+      "status": "PRIMARY_INGEST",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "MEDIUM",
+      "owner_module": "pieces_bridge",
+      "exists": true,
+      "size_bytes": 6475,
+      "lines": 164,
+      "hash_md5_8": "f244f5e5",
+      "notes": "Active ingestion. Re-classifies 526 from cache + MCP delta. Requires PiecesOS running."
+    },
+    "pieces_bridge/mcp_client.py": {
+      "status": "LOAD_BEARING",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "pieces_bridge",
+      "exists": true,
+      "size_bytes": 3722,
+      "lines": 101,
+      "hash_md5_8": "920e981d",
+      "notes": "MCP over SSE. Port 39300 hardcoded. Protocol path must match PiecesOS version."
+    },
+    "tmp/pdfs/generate_me_ops_app_summary.py": {
+      "status": "ORPHAN",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "NONE",
+      "owner_module": "tmp",
+      "exists": true,
+      "size_bytes": 7979,
+      "lines": 230,
+      "hash_md5_8": "0a325cba",
+      "notes": "Not imported anywhere. Likely PDF doc generator. Not wired to pipeline."
+    },
+    "docs/boot_verdict.json": {
+      "status": "GENERATED",
+      "safe_to_edit": true,
+      "entrypoint_relevance": "LOW",
+      "owner_module": "docs",
+      "exists": true,
+      "size_bytes": 1810,
+      "lines": 0,
+      "hash_md5_8": "64ae6e2b",
+      "notes": "Machine-readable boot test results."
+    },
+    "docs/ME_OPS_v2_FORENSIC_HANDOFF.pdf": {
+      "status": "PRIMARY_DOC",
+      "safe_to_edit": false,
+      "entrypoint_relevance": "HIGH",
+      "owner_module": "docs",
+      "exists": true,
+      "size_bytes": 801672,
+      "lines": 0,
+      "hash_md5_8": "eb99b506",
+      "notes": "Current forensic handoff. Source of truth over older ME_OPS_v2_HANDOFF.pdf."
+    }
+  },
+  "db_state": {
+    "tables": {
+      "projects": 13,
+      "sessions": 207,
+      "tags": 0,
+      "sqlite_sequence": 2,
+      "raw_import_batches": 11,
+      "raw_pieces_summaries": 526,
+      "raw_pieces_events": 0,
+      "entities": 561,
+      "cases": 18,
+      "case_members": 35,
+      "heuristics": 10,
+      "briefings": 0,
+      "interventions": 0,
+      "edges": 44,
+      "context_metrics": 207,
+      "embeddings": 579
+    }
+  },
+  "confirmed_versions": {
+    "python": "3.14.2",
+    "packages": {
+      "google.genai": "1.68.0",
+      "pydantic": "2.12.0",
+      "numpy": "2.4.3",
+      "websockets": "16.0"
+    },
+    "requirements_txt_complete": true
+  }
+}

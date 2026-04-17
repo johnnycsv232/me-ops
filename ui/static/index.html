@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ME-OPS Console</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand">
+        <p class="eyebrow">Forensic Memory Ops</p>
+        <h1>ME-OPS Console</h1>
+        <p class="subtitle">SQLite-native intelligence surface for stats, sessions, cases, and recall.</p>
+      </div>
+      <div class="panel">
+        <h2>Overview</h2>
+        <div id="stat-grid" class="stat-grid"></div>
+      </div>
+      <div class="panel">
+        <h2>Projects</h2>
+        <div id="project-bars" class="project-bars"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero panel">
+        <div>
+          <p class="eyebrow">Operator Surface</p>
+          <h2>Live Causal Memory</h2>
+          <p class="hero-copy">Browse the timeline, inspect derived cases, and query similar prior work without leaving the local repo.</p>
+        </div>
+        <div class="hero-meta">
+          <div><span>DB</span><strong id="db-path">-</strong></div>
+          <div><span>Root</span><strong id="project-root">-</strong></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Recall</p>
+            <h2>Query Prior Context</h2>
+          </div>
+          <form id="recall-form" class="recall-form">
+            <input id="recall-input" name="q" type="search" placeholder="IronClad revenue blocked deployment" />
+            <button type="submit">Run Recall</button>
+          </form>
+        </div>
+        <div id="recall-results" class="result-list empty">No query yet.</div>
+      </section>
+
+      <section class="two-up">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Events</p>
+              <h2>Recent Timeline</h2>
+            </div>
+            <form id="event-filter" class="event-filter">
+              <select id="event-project">
+                <option value="all">All projects</option>
+              </select>
+              <input id="event-query" type="search" placeholder="Search summaries or raw content" />
+              <button type="submit">Filter</button>
+            </form>
+          </div>
+          <div id="event-list" class="list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Cases</p>
+              <h2>Derived Patterns</h2>
+            </div>
+            <form id="case-filter" class="event-filter">
+              <select id="case-kind">
+                <option value="all">All case kinds</option>
+                <option value="failure_chain">Failure chains</option>
+                <option value="win_signature">Win signatures</option>
+              </select>
+              <button type="submit">Apply</button>
+            </form>
+          </div>
+          <div id="case-list" class="list"></div>
+        </section>
+      </section>
+
+      <section class="two-up">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Decisions</p>
+              <h2>Latest Decision Signals</h2>
+            </div>
+          </div>
+          <div id="decision-list" class="list compact"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Interventions</p>
+              <h2>Collapse Alerts</h2>
+            </div>
+          </div>
+          <div id="intervention-list" class="list compact"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

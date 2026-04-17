@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.py[cod]
+meops.db
+meops.db-shm
+meops.db-wal
+tmp/

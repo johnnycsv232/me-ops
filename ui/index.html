@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ME-OPS Console</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="backdrop"></div>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">ME-OPS</p>
+        <h1>Operator intelligence, not just a SQLite dump.</h1>
+        <p class="lede">
+          Inspect live project flow, failure chains, decisions, alerts, and recall from the same
+          canonical store the pipeline writes to.
+        </p>
+      </div>
+      <form id="recall-form" class="recall-form">
+        <label for="recall-query">Semantic Recall</label>
+        <div class="recall-row">
+          <input id="recall-query" name="q" placeholder="IronClad revenue blocked" autocomplete="off">
+          <button type="submit">Query</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="metrics" id="metrics"></section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Project Heatmap</h2>
+          <span class="panel-note">Event volume by project bucket</span>
+        </div>
+        <div id="projects" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Hot Sessions</h2>
+          <span class="panel-note">Highest context load right now</span>
+        </div>
+        <div id="sessions" class="stack"></div>
+      </article>
+    </section>
+
+    <section class="layout dense">
+      <article class="panel panel-span">
+        <div class="panel-head">
+          <h2>Live Recall</h2>
+          <span class="panel-note">Gemini when available, TF-IDF fallback otherwise</span>
+        </div>
+        <div id="recall-results" class="stack muted">Run a recall query to inspect prior matches.</div>
+      </article>
+    </section>
+
+    <section class="filters panel">
+      <div class="panel-head">
+        <h2>Explore Canonical Data</h2>
+        <span class="panel-note">Filter events, cases, decisions, and interventions</span>
+      </div>
+      <div class="filter-row">
+        <label>
+          Project
+          <select id="project-filter"></select>
+        </label>
+        <label>
+          Event Search
+          <input id="event-search" placeholder="notion, webhook, WSL, prompt engineering">
+        </label>
+        <button id="refresh-data" type="button">Refresh</button>
+      </div>
+    </section>
+
+    <section class="layout grid-2">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Events</h2>
+          <span class="panel-note">Latest event summaries and raw body excerpts</span>
+        </div>
+        <div id="events" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Cases</h2>
+          <span class="panel-note">Failure chains and win signatures</span>
+        </div>
+        <div id="cases" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Decisions</h2>
+          <span class="panel-note">Extracted choice points from workstream text</span>
+        </div>
+        <div id="decisions" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Alerts</h2>
+          <span class="panel-note">Context collapse interventions</span>
+        </div>
+        <div id="interventions" class="stack"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
